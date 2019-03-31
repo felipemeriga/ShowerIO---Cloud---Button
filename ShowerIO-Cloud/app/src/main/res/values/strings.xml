@@ -1,0 +1,143 @@
+<resources>
+    <string name="ForgotMenu">Esqueci minha senha</string>
+    <string name="app_name">ShowerIO</string>
+    <string name="title_activity_search_for_devices">searchForDevices</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="title_activity_fullscreen">FullscreenActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_about">Sobre</string>
+    <string name="iniciar">Iniciar!</string>
+    <string name="status_label">Status: </string>
+    <string name="list_showers">Lista de Dispositivos </string>
+    <string name="start">Começar </string>
+    <string name="setName">Nomear </string>
+    <string name="password">Senha </string>
+    <string name="reset">Resetar </string>
+    <string name="restart">Reiniciar </string>
+    <string name="delete">Deletar </string>
+    <string name="statistics">Estatísticas </string>
+    <string name="quit">Sair </string>
+    <string name="noName">Sem Nome</string>
+    <string name="facebook_app_id">382122962335824</string>
+    <string name="fb_login_protocol_scheme">fb382122962335824</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="dialog_name">Nome</string>
+    <string name="dialog_name_hint">Escolha um nome para o dispositivo</string>
+    <string name="mqtt_conection_failed">Erro em estabelecer a conexão, tente mais tarde</string>
+    <string name="dialog_save">Salvar</string>
+    <string name="dialog_help_user_name">Insira um nome antes de começar!</string>
+    <string name="dialog_set_name_fail">Erro ao atribuir o nome!</string>
+    <string name="dialog_set_time_fail">Falha em comunicação com o dispositivo!</string>
+    <string name="dialog_set_time_success">Valores Atualizados!</string>
+    <string name="cancel">Cancelar </string>
+    <string name="find_devices_help">Conecte o chuveiro ao wifi de sua casa!</string>
+
+
+    <string name="confDevices">  Configurando Dispositivos...</string>
+    <string name="wifi">Wifi</string>
+    <string name="wifiPass">Senha</string>
+    <string name="confirmWifi">Conectar</string>
+    <string name="device_count_title">Device Count</string>
+    <string name="wifi_5g_message">Device dose not support 5G Wifi</string>
+    <string name="location_disable_message">Location(GPS) is disable</string>
+    <string name="package_broadcast">Broadcast</string>
+    <string name="package_multicast">Multicast</string>
+    <string name="bssid_title">BSSID: </string>
+    <string name="title_activity_shower_base"></string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">ShowerIO</string>
+    <string name="nav_header_subtitle">www.showerio.com.br</string>
+    <string name="nav_header_desc">Navigation header</string>
+
+
+    <!--Menu item strings-->
+    <string name="nav_list_of_devices">Lista de Dispositivos</string>
+    <string name="nav_find_devices">Descobrir dispositivos</string>
+    <string name="nav_manage">Configurações</string>
+    <string name="nav_help">Ajuda</string>
+    <string name="nav_network">Network</string>
+    <string name="nav_account">Minha Conta</string>
+    <string name="nav_signout">Desconectar</string>
+
+    <!--Shower is offline-->
+    <string name="offline_title">Dispositivo Offline</string>
+    <string name="offline_text">Seu dispositivo para estar desconectado, deseja conectar ele a sua rede antiga ou uma nova?</string>
+    <string name="offline_fail">Não foi possível conectar o dispositivo</string>
+
+
+    <!--Controll the shower-->
+    <string name="control_bath_time">Tempo de Banho</string>
+    <string name="control_bath_wait_pos_time">Tempo de espera pós banho</string>
+    <string name="control_bath_wait_during_time">Tempo de espera durante banho</string>
+
+    <!--Reset the shower-->
+    <string name="reset_title">Resetar o dispositivo</string>
+    <string name="reset_text">Resetar irá desconectar seu ShowerIO de sua rede wifi atual, você realmente deseja resetar?</string>
+    <string name="reset_fail">Não foi possível resetar o dispositivo</string>
+
+    <!--Delete the shower-->
+    <string name="delete_title">Deletar o dispositivo</string>
+    <string name="delete_text">Deletar faz com que o dispositivo seja excluido de sua lista, e apaga todos os registros existentes, deseja mesmo deletar?</string>
+    <string name="delete_fail">Não foi possível deletar o dispositivo</string>
+
+    <!-- SignOut-->
+    <string name="logout_title">Sair da conta</string>
+    <string name="logout_text">Esta ação irá desconectar o aplicativo de sua conta, deseja continuar?</string>
+
+
+    <string-array name="times">
+        <item>Selecionar tempo</item>
+        <item>1 min</item>
+        <item>2 min</item>
+        <item>3 min</item>
+        <item>4 min</item>
+        <item>5 min</item>
+        <item>6 min</item>
+        <item>7 min</item>
+        <item>8 min</item>
+        <item>9 min</item>
+        <item>10 min</item>
+        <item>11 min</item>
+        <item>12 min</item>
+        <item>13 min</item>
+        <item>14 min</item>
+        <item>15 min</item>
+        <item>16 min</item>
+        <item>17 min</item>
+        <item>18 min</item>
+        <item>19 min</item>
+        <item>20 min</item>
+        <item>25 min</item>
+        <item>sem tempo</item>
+    </string-array>
+
+    <!--Statistics of the shower-->
+    <string name="daily_statistics">Estatísticas Diárias</string>
+    <string name="statsType">Tipo de Estatísticas</string>
+    <string name="daily">Diária </string>
+    <string name="monthly">Mensal </string>
+    <string name="emptyStatistics">Não há nenhum registro de banho para o dia selecionado</string>
+
+    <!--Statistics Daily Table-->
+    <string name="bathDateTime">Horário do Banho</string>
+    <string name="duration">Duração </string>
+    <string name="liters">Litros </string>
+
+    <!--Statistics Month-->
+    <string name="monthTitle">Resumo do Mês </string>
+    <string name="litersResponse">0 litros de água</string>
+    <string name="equi">O equivalente a</string>
+    <string name="hoursResponse">0 horas</string>
+    <string name="electricalTitle">Em um gasto total de energia elétrica de</string>
+    <string name="hoursTitle">Neste mês você passou</string>
+    <string name="inShower">no banho</string>
+    <string name="price">R$ 0</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_forgot_password">ForgotPassword</string>
+
+
+</resources>
