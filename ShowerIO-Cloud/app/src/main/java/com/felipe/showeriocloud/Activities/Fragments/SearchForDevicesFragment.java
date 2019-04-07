@@ -317,7 +317,7 @@ public class SearchForDevicesFragment extends Fragment implements View.OnClickLi
                     List<IEsptouchResult> results = (List<IEsptouchResult>) (List<?>) objects;
                     onSearchSuccessfull(results);
                 }
-            });
+            }, getContext());
             mTask.execute(ssid, bssid, password, deviceCount, broadcast);
         }
 

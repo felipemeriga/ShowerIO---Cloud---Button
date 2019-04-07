@@ -3,17 +3,29 @@ package com.felipe.showeriocloud.Activities.Fragments;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
 import com.espressif.iot.esptouch.EsptouchTask;
 import com.espressif.iot.esptouch.IEsptouchResult;
 import com.espressif.iot.esptouch.IEsptouchTask;
 import com.espressif.iot.esptouch.task.__IEsptouchTask;
 import com.felipe.showeriocloud.Activities.Fragments.SearchForDevicesFragment;
+import com.felipe.showeriocloud.Activities.ShowerIO.ShowerNavigationDrawer;
+import com.felipe.showeriocloud.Model.DeviceDO;
+import com.felipe.showeriocloud.Model.DevicePersistance;
+import com.felipe.showeriocloud.Processes.FullScan;
+import com.felipe.showeriocloud.Processes.ScanIpAddressImpl;
+import com.felipe.showeriocloud.Processes.SeekDevices;
+import com.felipe.showeriocloud.R;
+import com.felipe.showeriocloud.Utils.ServerCallback;
+import com.felipe.showeriocloud.Utils.ServerCallbackObject;
 import com.felipe.showeriocloud.Utils.ServerCallbackObjects;
 
 import java.lang.ref.WeakReference;
@@ -23,6 +35,8 @@ public class EsptouchAsyncTask4 extends AsyncTask<byte[], Void, List<IEsptouchRe
     private WeakReference<SearchForDevicesFragment> mFragment;
 
     private static final String TAG = "EsptouchAsyncTask4";
+    private ScanIpAddressImpl scanIpAddress;
+    private Context context;
 
     // without the lock, if the user tap confirm and cancel quickly enough,
     // the bug will arise. the reason is follows:
@@ -32,13 +46,16 @@ public class EsptouchAsyncTask4 extends AsyncTask<byte[], Void, List<IEsptouchRe
     // 3. Oops, the task should be cancelled, but it is running
     private final Object mLock = new Object();
     private ProgressDialog mProgressDialog;
+    private ProgressDialog fullScanProgressDialog;
     private AlertDialog mResultDialog;
+    private AlertDialog awsErrorDialog;
     private IEsptouchTask mEsptouchTask;
     private ServerCallbackObjects serverCallbackObjects;
 
-    EsptouchAsyncTask4(SearchForDevicesFragment fragment, ServerCallbackObjects serverCallbackObjects) {
+    EsptouchAsyncTask4(SearchForDevicesFragment fragment, ServerCallbackObjects serverCallbackObjects, Context context) {
         mFragment = new WeakReference<>(fragment);
         this.serverCallbackObjects = serverCallbackObjects;
+        this.context = context;
     }
 
     void cancelEsptouch() {
@@ -111,7 +128,7 @@ public class EsptouchAsyncTask4 extends AsyncTask<byte[], Void, List<IEsptouchRe
 
     @Override
     protected void onPostExecute(final List<IEsptouchResult> result) {
-        final  SearchForDevicesFragment fragment = mFragment.get();
+        final SearchForDevicesFragment fragment = mFragment.get();
         mProgressDialog.dismiss();
         mResultDialog = new AlertDialog.Builder(fragment.getContext())
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -125,14 +142,95 @@ public class EsptouchAsyncTask4 extends AsyncTask<byte[], Void, List<IEsptouchRe
                             fragment.passwordLayout.setVisibility(View.GONE);
                             fragment.progressBar.setVisibility(View.VISIBLE);
                             fragment.findDevicesTV.setVisibility(View.VISIBLE);
+                            mResultDialog.dismiss();
                             serverCallbackObjects.onServerCallbackObject(true, "SUCCESS", (List<Object>) (List<?>) result);
+                        } else {
+
+                            mResultDialog.dismiss();
+                            scanIpAddress = new ScanIpAddressImpl(context);
+                            scanIpAddress.setSubnet();
+                            RequestQueue requestQueue = Volley.newRequestQueue(context);
+
+                            final SeekDevices seekDevices = new FullScan(scanIpAddress.subnet, requestQueue, new ServerCallbackObject() {
+                                @Override
+                                public void onServerCallbackObject(Boolean status, String response, Object object) {
+                                    Log.i(TAG, "Fullscan done!");
+                                    DeviceDO deviceDO = (DeviceDO) object;
+                                    if (status) {
+                                        boolean alreadyExists = false;
+                                        if (DevicePersistance.lastUpdateUserDevices.size() > 0) {
+                                            for (DeviceDO device : DevicePersistance.lastUpdateUserDevices) {
+                                                if (device.getStatus().equals("OFFLINE")) {
+                                                    if (device.getMicroprocessorId().equals(deviceDO.getMicroprocessorId())) {
+                                                        alreadyExists = true;
+                                                        device.setStatus("ONLINE");
+                                                        DevicePersistance.fastUpdateDevice(device);
+                                                        Intent listOfDevices = new Intent(context, ShowerNavigationDrawer.class);
+                                                        fragment.getActivity().startActivity(listOfDevices);
+                                                        fragment.getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+                                                        fragment.getActivity().finish();
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        if (!alreadyExists) {
+                                            DevicePersistance.insertNewDevice(deviceDO, new ServerCallbackObject() {
+                                                @Override
+                                                public void onServerCallbackObject(Boolean status, String response, Object object) {
+                                                    if (status) {
+                                                        Intent listOfDevices = new Intent(context, ShowerNavigationDrawer.class);
+                                                        fragment.getActivity().startActivity(listOfDevices);
+                                                        fragment.getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+                                                        fragment.getActivity().finish();
+                                                    } else {
+                                                        fullScanProgressDialog.dismiss();
+                                                        awsErrorDialog = new AlertDialog.Builder(fragment.getContext())
+                                                                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                                                    @Override
+                                                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                                                        awsErrorDialog.dismiss();
+                                                                    }
+                                                                })
+                                                                .create();
+                                                        awsErrorDialog.setMessage("Houve um erro com nossos servidores, resete seu ShowerIO apertando o botão traseiro, e tente novamente");
+                                                        awsErrorDialog.show();
+                                                    }
+
+                                                }
+                                            });
+                                        }
+                                    }
+                                }
+                            });
+
+                            fullScanProgressDialog = new ProgressDialog(fragment.getContext());
+                            fullScanProgressDialog.setCanceledOnTouchOutside(false);
+                            fullScanProgressDialog.setMessage("Estamos sincronizando seu dispositivo!");
+                            fullScanProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                                @Override
+                                public void onCancel(DialogInterface dialog) {
+                                    synchronized (mLock) {
+                                        seekDevices.cancel(true);
+                                        fullScanProgressDialog.dismiss();
+                                    }
+                                }
+                            });
+                            fullScanProgressDialog.show();
+                            seekDevices.execute();
+
                         }
+                    }
+                })
+                .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mResultDialog.dismiss();
                     }
                 })
                 .create();
         mResultDialog.setCanceledOnTouchOutside(false);
         if (result == null) {
-            mResultDialog.setMessage("Nenhum dispositivo encontrado, verifique se foi instalado corretamente, e a senha inserida corretamente");
+            mResultDialog.setMessage("Verifique se o LED indicativo vermelho de seu equipamento parou de piscar, caso sim pressione OK para continuarmos a sincronização, ou tente novamente");
             mResultDialog.show();
             return;
         }
@@ -166,7 +264,7 @@ public class EsptouchAsyncTask4 extends AsyncTask<byte[], Void, List<IEsptouchRe
                 }
                 mResultDialog.setMessage("Dispositivo conectado com sucesso!");
             } else {
-                mResultDialog.setMessage("Nenhum dispositivo encontrado, verifique se foi instalado corretamente, e a senha inserida corretamente");
+                mResultDialog.setMessage("Verifique se o LED indicativo vermelho de seu equipamento parou de piscar, caso sim pressione OK para continuarmos a sincronização, ou tente novamente");
             }
             mResultDialog.show();
         }

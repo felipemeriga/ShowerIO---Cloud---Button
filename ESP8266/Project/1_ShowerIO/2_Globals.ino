@@ -45,13 +45,15 @@ extern "C" {
 #include "user_interface.h"
 }
 
-#define rele D1      // the number of the LED pin
-#define Led_Aviso D0
+#define Led_Aviso D0 //Green led for displaying bath status
+#define rele D1      // The relay pin for closing the pipe
+const int  BATH_BUTTON_PIN = D2;// Bath start/stop button
+#define buzzer D3 // Buzzer
+#define connectionLed D4 // Led for displaying the connection status
+#define buttonResetPin D5 //Button reset wifi
 
-const int buttonResetPin = 4; //Button reset wifi
 int buttonResetState = 0;
 
-const int  BATH_BUTTON_PIN = D2;// Sensor Input
 
 char aws_endpoint[]    = "agq6mvwjsctpy-ats.iot.us-east-1.amazonaws.com";
 char aws_region[]      = "us-east-1";
@@ -67,11 +69,16 @@ MillisTimer checkConnectionTimer = MillisTimer(1000);
 MillisTimer bathDurationTimer = MillisTimer(1000);
 MillisTimer bathStopTimer = MillisTimer(1000);
 MillisTimer bathWaitingTimer = MillisTimer(1000);
-MillisTimer bathScanTimmer = MillisTimer(1000);
-MillisTimer bathFalseAlarmTimmer = MillisTimer(1000);
-unsigned long flowLastValue;
+MillisTimer bathBlinkTimmer = MillisTimer(1000);
+MillisTimer bathBuzzerTimmer = MillisTimer(1000);
+MillisTimer connectionBlinkTimmer = MillisTimer(1000);
+MillisTimer connectTimmer = MillisTimer(1000);
+
 int bathRemainingTime;
 int stopRemainingTime;
+
+boolean bathDurationBuzzer;
+String connectionState;
 
 //MQTT config
 const int maxMQTTpackageSize = 512;
@@ -100,6 +107,7 @@ int address_wait = 1;
 int address_stopped = 2;
 int address_password = 3;
 int address_email = 4;
+int address_reconnection = 5;
 int test_timer = 2;
 boolean showerFalseAlarmTesting = false;
 boolean falseAlarmRunning = false;
@@ -110,6 +118,7 @@ byte bathWaitTime = EEPROM.read(address_wait); //tempo de espera atÃ© o banho 
 byte bathStoppedTime = EEPROM.read(address_stopped); // tempo que o banho pode ficar pausado
 byte password = EEPROM.read(address_password);
 byte email = EEPROM.read(address_email);
+byte reconnectionRetry = EEPROM.read(address_reconnection);
 
 //int tempo = (int)minutos * 60;
 //int tempo_espera = (int)minutos_espera * 60;
@@ -118,6 +127,7 @@ byte email = EEPROM.read(address_email);
 #define DBG_OUTPUT_PORT Serial
 
 ESP8266WebServer server(80);
+WiFiEventHandler mDisconnectHandler;
 
 // TODO - Verify if all these functions will be used
 //API REST Mapping Functions
@@ -143,3 +153,4 @@ boolean bathRunning;
 boolean stopPressed;
 boolean showerIsOn;
 boolean waiting;
+boolean resetAfterBath;

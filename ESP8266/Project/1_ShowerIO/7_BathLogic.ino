@@ -34,6 +34,11 @@ void bathWaitTimerReached(MillisTimer &mt) {
   bathDurationTimer.setInterval((10 * 1000));
   bathWaitingTimer.setInterval(10 * 1000);
   bathStopTimer.setInterval(20 * 1000);
+
+  if(resetAfterBath) {
+    DBG_OUTPUT_PORT.println("Reseting");
+    while (1)ESP.restart();
+  }
 }
 
 void bathTimeReached(MillisTimer &mt) {
@@ -41,8 +46,12 @@ void bathTimeReached(MillisTimer &mt) {
   //The bathTime was reached, turnoff the shower
   bathRunning = false;
   waiting = true;
-  digitalWrite(rele, LOW);
   showerIsOn = false;
+
+  bathBlinkTimmer.stop();
+  bathBlinkTimmer.reset();
+  digitalWrite(rele, LOW);
+  digitalWrite(Led_Aviso, LOW);
 
   bathWaitingTimer.setInterval(10 * 1000);
   bathWaitingTimer.expiredHandler(bathWaitTimerReached);
@@ -55,14 +64,49 @@ void bathStoppedTimerReached(MillisTimer &mt) {
   //computeBathStatistics(false);
   bathRunning = false;
   waiting = true;
-  digitalWrite(rele, LOW);
   showerIsOn = false;
+
+  bathBlinkTimmer.stop();
+  bathBlinkTimmer.reset();
+  digitalWrite(rele, LOW);
+  digitalWrite(Led_Aviso, LOW);
+
   //TODO - Start wait time decreasing the stopped time reached
   bathWaitingTimer.setInterval(10 * 1000);
   bathWaitingTimer.expiredHandler(bathWaitTimerReached);
   bathWaitingTimer.start();
   DBG_OUTPUT_PORT.println("Bath stop reached! Triggering the wait time of: " + (String)bathWaitTime);
 
+}
+
+void bathBlinkTimerReached(MillisTimer &mt) {
+  if (digitalRead(Led_Aviso) == HIGH) {
+    digitalWrite(Led_Aviso, LOW);
+  } else {
+    digitalWrite(Led_Aviso, HIGH);
+  }
+  bathBlinkTimmer.reset();
+  bathBlinkTimmer.start();
+}
+
+void buzzerTimerReached(MillisTimer &mt) {
+  digitalWrite(buzzer, LOW);
+  bathBuzzerTimmer.reset();
+  bathBuzzerTimmer.stop();
+
+}
+
+void checkRemainingTimeForBuzzer(boolean *buzzerEnabled) {
+  if ((bathDurationTimer.getRemainingTime() < 5000) && (*buzzerEnabled == true)) {
+    DBG_OUTPUT_PORT.println(bathDurationTimer.getRemainingTime());
+    DBG_OUTPUT_PORT.println(bathDurationTimer.isRunning());
+    bathBuzzerTimmer.setInterval(3000);
+    bathBuzzerTimmer.expiredHandler(buzzerTimerReached);
+    bathBuzzerTimmer.start();
+    digitalWrite(buzzer, HIGH);
+    *buzzerEnabled = false;
+  }
+  bathBuzzerTimmer.run();
 }
 
 void startBath() {
@@ -79,8 +123,13 @@ void startBath() {
   bathStopTimer.expiredHandler(bathStoppedTimerReached);
   // commented, because the time will go out even if the bath is running
   //bathStopTimer.start();
+  bathBlinkTimmer.setInterval(500);
+  bathBlinkTimmer.expiredHandler(bathBlinkTimerReached);
+
   bathRunning = true;
   digitalWrite(rele, HIGH);
+  digitalWrite(Led_Aviso, HIGH);
+  bathDurationBuzzer = true;
 }
 
 
@@ -102,7 +151,7 @@ void buttonPressed () // Interrupt function
 
 void initBathConfiguration() {
   pinMode(BATH_BUTTON_PIN, INPUT);
-  DBG_OUTPUT_PORT.println("BATH CONFIGURED");
+  DBG_OUTPUT_PORT.println("Bath configured");
   attachInterrupt(BATH_BUTTON_PIN, buttonPressed, RISING);
   sei(); // Enable interrupts
   waiting = false;
@@ -111,8 +160,9 @@ void initBathConfiguration() {
   stopPressed = false;
   flow_frequency = 0;
   l_hour = 0;
-  flowLastValue = 0;
   totalFlowFrequency = 0;
+
+  bathDurationBuzzer = false;
 }
 
 void bathProcess ()
@@ -121,7 +171,9 @@ void bathProcess ()
     if (bathRunning) {
       if (stopPressed == false) {
         if (!showerIsOn) {
+          bathBlinkTimmer.stop();
           digitalWrite(rele, HIGH);
+          digitalWrite(Led_Aviso, HIGH);
           bathDurationTimer.start();
           DBG_OUTPUT_PORT.println("bath is running");
           stopRemainingTime = bathStopTimer.getRemainingTime();
@@ -130,10 +182,13 @@ void bathProcess ()
         }
         showerIsOn = true;
         bathDurationTimer.run();
+        checkRemainingTimeForBuzzer(&bathDurationBuzzer);
 
       } else if (stopPressed == true) {
         if (showerIsOn) {
+          bathBlinkTimmer.start();
           digitalWrite(rele, LOW);
+          digitalWrite(buzzer, LOW);
           bathStopTimer.start();
           DBG_OUTPUT_PORT.println("bath is stopped");
           bathRemainingTime = bathDurationTimer.getRemainingTime();
@@ -142,6 +197,7 @@ void bathProcess ()
         }
         showerIsOn = false;
         bathStopTimer.run();
+        bathBlinkTimmer.run();
       }
     }
     // TODO - Implement the alert LED that the bath is finishing
