@@ -47,6 +47,7 @@ public class EsptouchAsyncTask4 extends AsyncTask<byte[], Void, List<IEsptouchRe
     private ProgressDialog fullScanProgressDialog;
     private AlertDialog mResultDialog;
     private AlertDialog awsErrorDialog;
+    private AlertDialog noDevicesDialog;
     private IEsptouchTask mEsptouchTask;
     private ServerCallbackObjects serverCallbackObjects;
 
@@ -197,6 +198,18 @@ public class EsptouchAsyncTask4 extends AsyncTask<byte[], Void, List<IEsptouchRe
                                                 }
                                             });
                                         }
+                                    } else {
+                                        noDevicesDialog = new AlertDialog.Builder(fragment.getContext())
+                                                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                                        noDevicesDialog.dismiss();
+                                                    }
+                                                })
+                                                .create();
+                                        noDevicesDialog.setMessage("Não foi possível terminar a sincronização, tente novamente!");
+                                        noDevicesDialog.show();
+                                        fullScanProgressDialog.dismiss();
                                     }
                                 }
                             });
@@ -228,7 +241,7 @@ public class EsptouchAsyncTask4 extends AsyncTask<byte[], Void, List<IEsptouchRe
                 .create();
         mResultDialog.setCanceledOnTouchOutside(false);
         if (result == null) {
-            mResultDialog.setMessage("Verifique se o LED indicativo vermelho de seu equipamento parou de piscar, caso sim pressione OK para continuarmos a sincronização, ou tente novamente");
+            mResultDialog.setMessage("Verifique se o LED indicativo vermelho de seu equipamento parou de piscar, caso sim pressione OK para continuarmos a sincronização, ou cancelar e tente novamente");
             mResultDialog.show();
             return;
         }
@@ -262,7 +275,7 @@ public class EsptouchAsyncTask4 extends AsyncTask<byte[], Void, List<IEsptouchRe
                 }
                 mResultDialog.setMessage("Dispositivo conectado com sucesso!");
             } else {
-                mResultDialog.setMessage("Verifique se o LED indicativo vermelho de seu equipamento parou de piscar, caso sim pressione OK para continuarmos a sincronização, ou tente novamente");
+                mResultDialog.setMessage("Verifique se o LED indicativo vermelho de seu equipamento parou de piscar, caso sim pressione OK para continuarmos a sincronização, ou cancelar e tente novamente");
             }
             mResultDialog.show();
         }
