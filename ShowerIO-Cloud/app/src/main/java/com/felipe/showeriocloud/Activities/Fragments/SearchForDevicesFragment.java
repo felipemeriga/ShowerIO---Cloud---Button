@@ -1,6 +1,7 @@
 package com.felipe.showeriocloud.Activities.Fragments;
 
 import android.Manifest;
+import android.os.PowerManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -63,6 +64,7 @@ public class SearchForDevicesFragment extends Fragment implements View.OnClickLi
     public RequestQueue requestQueue;
     private static final String TAG = "SearchForDevices";
     private static final int REQUEST_PERMISSION = 0x01;
+    protected PowerManager.WakeLock mWakeLock;
 
     private RegisterNewDevices registerNewDevices;
     @BindView(R.id.relative_layout)
@@ -203,6 +205,10 @@ public class SearchForDevicesFragment extends Fragment implements View.OnClickLi
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+
+        final PowerManager pm = (PowerManager) getActivity().getSystemService(Context.POWER_SERVICE);
+        this.mWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "myapp:ShowerIO");
+        this.mWakeLock.acquire();
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
@@ -213,6 +219,7 @@ public class SearchForDevicesFragment extends Fragment implements View.OnClickLi
 
     @Override
     public void onDetach() {
+        this.mWakeLock.release();
         super.onDetach();
         mListener = null;
     }

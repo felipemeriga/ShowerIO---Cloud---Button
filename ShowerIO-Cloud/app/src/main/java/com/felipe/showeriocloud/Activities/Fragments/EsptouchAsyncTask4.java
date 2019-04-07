@@ -16,7 +16,6 @@ import com.espressif.iot.esptouch.EsptouchTask;
 import com.espressif.iot.esptouch.IEsptouchResult;
 import com.espressif.iot.esptouch.IEsptouchTask;
 import com.espressif.iot.esptouch.task.__IEsptouchTask;
-import com.felipe.showeriocloud.Activities.Fragments.SearchForDevicesFragment;
 import com.felipe.showeriocloud.Activities.ShowerIO.ShowerNavigationDrawer;
 import com.felipe.showeriocloud.Model.DeviceDO;
 import com.felipe.showeriocloud.Model.DevicePersistance;
@@ -24,7 +23,6 @@ import com.felipe.showeriocloud.Processes.FullScan;
 import com.felipe.showeriocloud.Processes.ScanIpAddressImpl;
 import com.felipe.showeriocloud.Processes.SeekDevices;
 import com.felipe.showeriocloud.R;
-import com.felipe.showeriocloud.Utils.ServerCallback;
 import com.felipe.showeriocloud.Utils.ServerCallbackObject;
 import com.felipe.showeriocloud.Utils.ServerCallbackObjects;
 
