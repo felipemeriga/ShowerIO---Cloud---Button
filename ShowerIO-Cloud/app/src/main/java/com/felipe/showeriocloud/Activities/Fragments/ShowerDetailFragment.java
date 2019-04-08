@@ -9,6 +9,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -69,10 +70,12 @@ public class ShowerDetailFragment extends Fragment {
 
     private static final String TAG = "ShowerDetailFragment";
 
+    private boolean connectionStatus;
     private ProgressDialog mProgressDialog;
     private String oldName;
     private ProgressDialog mqttProgressDialog;
     private ProgressDialog publishProgressDialog;
+    private AlertDialog disconnectedDialog;
 
     @BindView(R.id.mainGrid)
     public GridLayout mainGrid;
@@ -130,7 +133,7 @@ public class ShowerDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-
+        connectionStatus = false;
         View view = inflater.inflate(R.layout.fragment_shower_detail, container, false);
 
         ButterKnife.bind(this, view);
@@ -180,6 +183,7 @@ public class ShowerDetailFragment extends Fragment {
                     public void run() {
                         if (status) {
                             mqttProgressDialog.dismiss();
+                            checkConnection();
                         } else {
                             mqttProgressDialog.dismiss();
                             Toast toast = new Toast(getContext());
@@ -197,6 +201,43 @@ public class ShowerDetailFragment extends Fragment {
             }
         });
     }
+
+    void checkConnection() {
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                disconnectedDialog = new AlertDialog.Builder(getContext())
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                device.setStatus("OFFLINE");
+                                DevicePersistance.fastUpdateDevice(device);
+                                mListener.onFragmentInteraction("ShowerListFragment");
+                            }
+
+                        }).create();
+                disconnectedDialog.setMessage("Tentamos contatar seu ShowerIO e parece que este esta desconectado," +
+                        " verifique se o LED indicativo vermelho esta piscado, caso positivo, efetue uma nova busca para reconectar o mesmo");
+
+                disconnectedDialog.setCanceledOnTouchOutside(false);
+                disconnectedDialog.show();
+            }
+        }, 100);
+
+
+        awsIotCoreManager.publishConnectionCheck(device, new ServerCallback() {
+            @Override
+            public void onServerCallback(boolean status, String response) {
+                if(status) {
+                    connectionStatus = true;
+                }
+            }
+        });
+    }
+
+
 
     private void setSingleEvent(GridLayout mainGrid) {
         //Loop all child item of Main Grid

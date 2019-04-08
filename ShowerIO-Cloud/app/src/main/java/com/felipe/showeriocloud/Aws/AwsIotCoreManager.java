@@ -11,6 +11,7 @@ import com.amazonaws.mobile.client.AWSMobileClient;
 import com.amazonaws.mobile.config.AWSConfiguration;
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttClientStatusCallback;
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttManager;
+import com.amazonaws.mobileconnectors.iot.AWSIotMqttNewMessageCallback;
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttQos;
 import com.amazonaws.regions.Regions;
 import com.felipe.showeriocloud.Model.DeviceDO;
@@ -36,7 +37,6 @@ public class AwsIotCoreManager {
     public AwsIotCoreManager() {
 
     }
-
 
 
     public void initializeIotCore(final String clientId, final String endpoint, final Activity activity, final ServerCallback serverCallback) {
@@ -68,29 +68,29 @@ public class AwsIotCoreManager {
                                 if (status == AWSIotMqttClientStatus.Connecting) {
 
                                 } else if (status == AWSIotMqttClientStatus.Connected) {
-                                    serverCallback.onServerCallback(true,status.toString());
+                                    serverCallback.onServerCallback(true, status.toString());
 
                                 } else if (status == AWSIotMqttClientStatus.Reconnecting) {
                                     if (throwable != null) {
                                         Log.e(TAG, "Connection error.", throwable);
-                                        serverCallback.onServerCallback(false,status.toString());
+                                        serverCallback.onServerCallback(false, status.toString());
                                     }
                                 } else if (status == AWSIotMqttClientStatus.ConnectionLost) {
                                     if (throwable != null) {
                                         Log.e(TAG, "Connection error.", throwable);
                                         throwable.printStackTrace();
-                                        serverCallback.onServerCallback(false,status.toString());
+                                        serverCallback.onServerCallback(false, status.toString());
                                     }
                                 } else {
                                     Log.e(TAG, "error matching the status");
-                                    serverCallback.onServerCallback(false,"error matching the status");
+                                    serverCallback.onServerCallback(false, "error matching the status");
                                 }
 
                             }
                         });
                     } catch (final Exception e) {
                         Log.e(TAG, "Connection error.", e);
-                        serverCallback.onServerCallback(false,e.getMessage());
+                        serverCallback.onServerCallback(false, e.getMessage());
                     }
                 } catch (Exception e) {
                     serverCallback.onServerCallback(false, e.getMessage());
@@ -108,36 +108,57 @@ public class AwsIotCoreManager {
             mqttManager.publishString(msg, topic, AWSIotMqttQos.QOS0);
             device.setBathTime(bathTime);
             device.setWaitingTime(waitingTime);
-            serverCallback.onServerCallback(true,"successful");
+            serverCallback.onServerCallback(true, "successful");
         } catch (Exception e) {
             Log.e(TAG, "Publish error.", e);
             serverCallback.onServerCallback(false, e.getMessage());
         }
     }
 
-    public void publishReset(DeviceDO device, ServerCallback serverCallback){
+    public void publishReset(DeviceDO device, ServerCallback serverCallback) {
         final String topic = device.getMicroprocessorId() + "/configuration";
         final String msg = "reset";
         try {
             mqttManager.publishString(msg, topic, AWSIotMqttQos.QOS0);
             device.setStatus("OFFLINE");
-            serverCallback.onServerCallback(true,"successful");
+            serverCallback.onServerCallback(true, "successful");
         } catch (Exception e) {
             Log.e(TAG, "Publish error.", e);
             serverCallback.onServerCallback(false, e.getMessage());
         }
     }
 
-    public void publishDelete(ServerCallback serverCallback){
+    public void publishDelete(ServerCallback serverCallback) {
         final String topic = "configuration";
         final String msg = "delete";
         try {
             mqttManager.publishString(msg, topic, AWSIotMqttQos.QOS0);
-            serverCallback.onServerCallback(true,"successful");
+            serverCallback.onServerCallback(true, "successful");
         } catch (Exception e) {
             Log.e(TAG, "Publish error.", e);
             serverCallback.onServerCallback(false, e.getMessage());
         }
+    }
+
+    public void publishConnectionCheck(DeviceDO device, final ServerCallback serverCallback) {
+        final String espTopic = device.getMicroprocessorId() + "/check";
+
+        Log.d(TAG, "topic = " + espTopic);
+
+        try {
+            mqttManager.subscribeToTopic(espTopic, AWSIotMqttQos.QOS0,
+                    new AWSIotMqttNewMessageCallback() {
+                        @Override
+                        public void onMessageArrived(final String topic, final byte[] data) {
+                            if(topic.equals(espTopic)){
+                                serverCallback.onServerCallback(true,"SUCCESS");
+                            }
+                        }
+                    });
+        } catch (Exception e) {
+            Log.e(TAG, "Subscription error.", e);
+        }
+
     }
 
 
