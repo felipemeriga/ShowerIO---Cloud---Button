@@ -63,7 +63,7 @@
 
     <!--Shower is offline-->
     <string name="offline_title">Dispositivo Offline</string>
-    <string name="offline_text">Seu dispositivo para estar desconectado, deseja conectar ele a sua rede antiga ou uma nova?</string>
+    <string name="offline_text">Seu dispositivo parece estar desconectado, deseja conectar ele a sua rede antiga ou uma nova?</string>
     <string name="offline_fail">Não foi possível conectar o dispositivo</string>
 
 

@@ -59,6 +59,8 @@ char aws_endpoint[]    = "agq6mvwjsctpy-ats.iot.us-east-1.amazonaws.com";
 char aws_region[]      = "us-east-1";
 const char* aws_topic_times  = strdup(((String)ESP.getChipId() + "/times").c_str());
 const char* aws_topic_conf  = strdup(((String)ESP.getChipId() + "/configuration").c_str());
+const char* aws_topic_check  = strdup(((String)ESP.getChipId() + "/check").c_str());
+const char* aws_topic_check_response  = strdup(((String)ESP.getChipId() + "/check/response").c_str());
 const char* aws_statistics_topic  = "statistics";
 int port = 443;
 

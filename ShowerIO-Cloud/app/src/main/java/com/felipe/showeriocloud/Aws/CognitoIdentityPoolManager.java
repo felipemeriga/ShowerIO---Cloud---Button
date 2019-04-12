@@ -60,14 +60,14 @@ public class CognitoIdentityPoolManager {
     /**
      * Add you app id
      */
-    private static final String clientId = "3to8div1ae3lglqtc145q9qgff";
+    private static final String clientId = "6soie10etsogchdl09otarjtkd";
 
     /**
      * App secret associated with your app id - if the App id does not have an associated App secret,
      * set the App secret to null.
      * e.g. clientSecret = null;
      */
-    private static final String clientSecret = "hnsn3svuhb0eb2eqhnhkr4hqdv2p2vvopbn124v0l6p3n6qeqnf";
+    private static final String clientSecret = "ctcb21rf56rbaujko0suq6g5v1kta1p5c7hntl4cb1fj7ijksaf";
 
     /**
      * Set Your User Pools region.

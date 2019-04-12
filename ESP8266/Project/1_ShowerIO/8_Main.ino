@@ -1,23 +1,5 @@
 //Main Function .INO FILE
 
-
-void connectToAWSandServer() {
-  DBG_OUTPUT_PORT.println("");
-  DBG_OUTPUT_PORT.println("Starting AWS Services and connection");
-
-  //fill AWS parameters
-  awsWSclient.setAWSRegion(aws_region);
-  awsWSclient.setAWSDomain(aws_endpoint);
-  awsWSclient.setAWSKeyID(aws_key);
-  awsWSclient.setAWSSecretKey(aws_secret);
-  awsWSclient.setUseSSL(true);
-
-  if (connect ()) {
-    subscribe ();
-  }
-
-}
-
 void blinkingConnectionReached(MillisTimer &mt) {
   if (digitalRead(connectionLed) == HIGH) {
     digitalWrite(connectionLed, LOW);
@@ -32,38 +14,14 @@ void blinkingConnectionReached(MillisTimer &mt) {
 void onDisconnected(const WiFiEventStationModeDisconnected& event)
 {
   DBG_OUTPUT_PORT.println("Disconnected!!!");
-  connectionBlinkTimmer.start();
-}
-
-void connectTimmerReached(MillisTimer &mt) {
-  DBG_OUTPUT_PORT.println("Connect timmer reached");
-  connectTimmer.reset();
-  connectTimmer.stop();
-  if (bathRunning) {
-    DBG_OUTPUT_PORT.println("A bath is running, reseting after bath");
-    resetAfterBath = true;
-  } else {
-    DBG_OUTPUT_PORT.println("Reseting");
-    while (1)ESP.restart();
-  }
+  DBG_OUTPUT_PORT.println("Restarting ESP");
+  while (1)ESP.restart();
+  delay(500);
 }
 
 void startConnectionSettings() {
   resetAfterBath = false;
-  connectionState = "DISCONECTED";
-  WiFi.mode(WIFI_STA);
   mDisconnectHandler = WiFi.onStationModeDisconnected(&onDisconnected);
-  if (WiFi.SSID() != NULL) {
-    connectionState = "RECONNECTING";
-    DBG_OUTPUT_PORT.println(connectionState);
-    connectTimmer.setInterval(30000);
-    connectTimmer.expiredHandler(connectTimmerReached);
-  } else {
-    connectionState = "CONNECTING";
-    DBG_OUTPUT_PORT.println(connectionState);
-    WiFi.beginSmartConfig();
-  }
-
   connectionBlinkTimmer.setInterval(500);
   connectionBlinkTimmer.expiredHandler(blinkingConnectionReached);
   connectionBlinkTimmer.start();
@@ -85,7 +43,7 @@ void configureGPIO(void) {
   pinMode(buzzer, OUTPUT);
   pinMode(connectionLed, OUTPUT);
 
-  
+
   digitalWrite(rele, LOW);
   digitalWrite(Led_Aviso, LOW);
   digitalWrite(buzzer, LOW);
@@ -140,7 +98,48 @@ void setup(void) {
   configureServer();
   initBathConfiguration();
   startConnectionSettings();
+  // set for STA mode
+  bool timeout = true;
+  WiFi.mode(WIFI_STA);
+  if (WiFi.SSID() != NULL) {
+    DBG_OUTPUT_PORT.println("Getting last saved Wifi");
+    WiFi.begin(WiFi.SSID().c_str(), WiFi.psk().c_str());
+    unsigned long start = millis();
+    while (millis() - start < 30000) {
+      if (WiFi.status() == WL_CONNECTED) {
+        timeout = false;
+        break;
+      }
+      delay(500);
+    }
+  }
+  if (timeout) {
+    timeout = true;
+    DBG_OUTPUT_PORT.println("Begin smart config");
+    WiFi.beginSmartConfig();
+    unsigned long start = millis();
+    unsigned long waitTime;
+    if (WiFi.SSID() != NULL) {
+      waitTime = 30000;
+    } else {
+      waitTime = 300000;
+    }
 
+    while (millis() - start < waitTime) {
+      if (WiFi.status() == WL_CONNECTED) {
+        DBG_OUTPUT_PORT.println("Connected to a network!");
+        timeout = false;
+        break;
+      }
+      delay(500);
+    }
+
+  }
+  if (timeout) {
+    DBG_OUTPUT_PORT.println("Restarting ESP");
+    while (1)ESP.restart();
+    delay(500);
+  }
   // if wifi cannot connect start smartconfig
   //  while (WiFi.status() != WL_CONNECTED) {
   //    delay(500);
@@ -156,7 +155,25 @@ void setup(void) {
   //      }
   //    }
   //  }
-  //
+
+  DBG_OUTPUT_PORT.println("");
+  DBG_OUTPUT_PORT.println("Starting AWS Services and connection");
+
+  WiFi.printDiag(DBG_OUTPUT_PORT);
+
+  // Print the IP address
+  DBG_OUTPUT_PORT.println(WiFi.localIP());
+
+  //fill AWS parameters
+  awsWSclient.setAWSRegion(aws_region);
+  awsWSclient.setAWSDomain(aws_endpoint);
+  awsWSclient.setAWSKeyID(aws_key);
+  awsWSclient.setAWSSecretKey(aws_secret);
+  awsWSclient.setUseSSL(true);
+
+  if (connect ()) {
+    subscribe ();
+  }
 }
 
 void loop(void) {
@@ -174,24 +191,24 @@ void loop(void) {
   // check if the pushbutton is pressed.
   // if it is, the buttonState is HIGH:
 
-  //  if (WiFi.status() == WL_CONNECTED) {
-  //    if (awsWSclient.connected ()) {
-  //      client.loop ();
-  //    } else {
-  //      //handle reconnection
-  //      if (connect ()) {
-  //        subscribe ();
-  //      }
-  //    }
-  //  }
-   // Reset Wifi button
-    buttonResetState = digitalRead(buttonResetPin);
-     if (buttonResetState == HIGH) {
-      // Reset Wifi
-      WiFi.disconnect();
-      delay(1000);
-       while (1)ESP.restart();
-     
+
+  if (awsWSclient.connected ()) {
+    client.loop ();
+  } else {
+    //handle reconnection
+    if (connect ()) {
+      subscribe ();
     }
+  }
+
+//  // Reset Wifi button
+//  buttonResetState = digitalRead(buttonResetPin);
+//  if (buttonResetState == HIGH) {
+//    // Reset Wifi
+//    WiFi.disconnect();
+//    delay(1000);
+//    while (1)ESP.restart();
+//
+//  }
 
 }

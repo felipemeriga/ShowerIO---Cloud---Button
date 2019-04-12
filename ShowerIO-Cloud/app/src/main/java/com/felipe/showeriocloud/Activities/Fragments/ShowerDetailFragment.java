@@ -76,6 +76,10 @@ public class ShowerDetailFragment extends Fragment {
     private ProgressDialog mqttProgressDialog;
     private ProgressDialog publishProgressDialog;
     private AlertDialog disconnectedDialog;
+    private AlertDialog timeDialog;
+    private AlertDialog nameDialog;
+    private AlertDialog deleteDialog;
+    private AlertDialog resetDialog;
 
     @BindView(R.id.mainGrid)
     public GridLayout mainGrid;
@@ -208,35 +212,58 @@ public class ShowerDetailFragment extends Fragment {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                disconnectedDialog = new AlertDialog.Builder(getContext())
-                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                device.setStatus("OFFLINE");
-                                DevicePersistance.fastUpdateDevice(device);
-                                mListener.onFragmentInteraction("ShowerListFragment");
-                            }
+                if (!connectionStatus) {
+                    if (timeDialog != null) {
+                        timeDialog.dismiss();
+                    }
+                    if (nameDialog != null) {
+                        nameDialog.dismiss();
+                    }
+                    if (resetDialog != null) {
+                        resetDialog.dismiss();
+                    }
+                    if (deleteDialog != null) {
+                        deleteDialog.dismiss();
+                    }
 
-                        }).create();
-                disconnectedDialog.setMessage("Tentamos contatar seu ShowerIO e parece que este esta desconectado," +
-                        " verifique se o LED indicativo vermelho esta piscado, caso positivo, efetue uma nova busca para reconectar o mesmo");
+                    disconnectedDialog = new AlertDialog.Builder(getContext())
+                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    //device.setStatus("OFFLINE");
+                                    //DevicePersistance.fastUpdateDevice(device);
+                                    mListener.onFragmentInteraction("ShowerListFragment");
+                                }
 
-                disconnectedDialog.setCanceledOnTouchOutside(false);
-                disconnectedDialog.show();
-            }
-        }, 100);
+                            }).create();
+                    disconnectedDialog.setMessage("Tentamos contatar seu ShowerIO e parece que este esta desconectado," +
+                            " verifique se o LED indicativo vermelho esta piscado, caso positivo, efetue uma nova busca para reconectar o mesmo");
 
-
-        awsIotCoreManager.publishConnectionCheck(device, new ServerCallback() {
-            @Override
-            public void onServerCallback(boolean status, String response) {
-                if(status) {
-                    connectionStatus = true;
+                    disconnectedDialog.setCanceledOnTouchOutside(false);
+                    disconnectedDialog.show();
                 }
             }
-        });
-    }
+        }, 2000);
 
+        //Run on a new thread
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                awsIotCoreManager.publishConnectionCheck(device, new
+
+                        ServerCallback() {
+                            @Override
+                            public void onServerCallback(boolean status, String response) {
+                                if (status) {
+                                    connectionStatus = true;
+                                }
+                            }
+                        });
+
+            }
+
+        }).start();
+    }
 
 
     private void setSingleEvent(GridLayout mainGrid) {
@@ -307,6 +334,7 @@ public class ShowerDetailFragment extends Fragment {
 
     public interface OnFragmentInteractionListener {
         void onFragmentInteraction(String fragmentName);
+
     }
 
 
@@ -337,12 +365,12 @@ public class ShowerDetailFragment extends Fragment {
         mSpinnerBathPosTime.setSelection(returnHardCoddedPosition(device.getWaitingTime()));
 
         mBuilder.setView(mView);
-        final AlertDialog dialog = mBuilder.create();
-        dialog.show();
+        timeDialog = mBuilder.create();
+        timeDialog.show();
         mSetTimes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog.dismiss();
+                timeDialog.dismiss();
                 publishProgressDialog = new ProgressDialog(getActivity());
                 publishProgressDialog.setMessage("Aplicando...");
                 publishProgressDialog.setCanceledOnTouchOutside(false);
@@ -380,7 +408,6 @@ public class ShowerDetailFragment extends Fragment {
         builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
                 awsIotCoreManager.publishReset(device, new ServerCallback() {
                     @Override
                     public void onServerCallback(boolean status, String response) {
@@ -401,7 +428,8 @@ public class ShowerDetailFragment extends Fragment {
                 dialog.dismiss();
             }
         });
-        builder.show();
+        resetDialog = builder.create();
+        resetDialog.show();
 
     }
 
@@ -435,7 +463,8 @@ public class ShowerDetailFragment extends Fragment {
                 dialog.dismiss();
             }
         });
-        builder.show();
+        deleteDialog = builder.create();
+        deleteDialog.show();
     }
 
     private void onSetNamePressed() {
@@ -445,14 +474,14 @@ public class ShowerDetailFragment extends Fragment {
         Button mSetName = (Button) mView.findViewById(R.id.btnSetName);
         mBuilder.setView(mView);
         final Context fragmentContext = this.getContext();
-        final AlertDialog dialog = mBuilder.create();
-        dialog.setCanceledOnTouchOutside(true);
-        dialog.show();
+        nameDialog = mBuilder.create();
+        nameDialog.setCanceledOnTouchOutside(true);
+        nameDialog.show();
         mSetName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (!mName.getText().toString().isEmpty()) {
-                    dialog.dismiss();
+                    nameDialog.dismiss();
                     setNewNameCall(mName.getText().toString());
                 } else {
                     Toast.makeText(fragmentContext,

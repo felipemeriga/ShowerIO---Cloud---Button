@@ -1,2 +1,2 @@
-char aws_key[]         = "insert your key here";
-char aws_secret[]      = "insert your secret here";
+char aws_key[]         = "AKIA37XQ7M6A2IKJE67H";
+char aws_secret[]      = "Yf3p7p/iAISUWII1JbSkvDzhOxLhjCaa4quMhaTN";

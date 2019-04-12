@@ -54,7 +54,7 @@ public class AuthorizationHandle {
 
     public static String getCurrentUserId() {
         if (mainAuthMethod.equals(COGNITO_POOL)) {
-            CognitoIdentityPoolManager.getCurrUser();
+            return CognitoIdentityPoolManager.getPool().getCurrentUser().getUserId();
         } else if (mainAuthMethod.equals(FEDERATED_IDENTITIES)) {
             return FacebookInformationSeeker.facebookEmail;
         }

@@ -157,9 +157,7 @@ public class ShowerListFragment extends Fragment implements RecyclerItemTouchHel
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                Intent loginActivity = new Intent(getActivity(), SearchForDevices.class);
-                startActivity(loginActivity);
-                getActivity().finish();
+                mListener.onResetedDevice();
             }
         });
 
@@ -184,6 +182,7 @@ public class ShowerListFragment extends Fragment implements RecyclerItemTouchHel
 
     public interface OnFragmentInteractionListener {
         void onSelectedDevice(DeviceDO deviceDO);
+        void onResetedDevice();
     }
 
     private void helpUser() {

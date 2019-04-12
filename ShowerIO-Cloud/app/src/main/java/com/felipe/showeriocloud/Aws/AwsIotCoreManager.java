@@ -142,15 +142,18 @@ public class AwsIotCoreManager {
 
     public void publishConnectionCheck(DeviceDO device, final ServerCallback serverCallback) {
         final String espTopic = device.getMicroprocessorId() + "/check";
+        final String espTopicResponse = device.getMicroprocessorId() + "/check/response";
+
+        String message = "Hello!";
 
         Log.d(TAG, "topic = " + espTopic);
 
         try {
-            mqttManager.subscribeToTopic(espTopic, AWSIotMqttQos.QOS0,
+            mqttManager.subscribeToTopic(espTopicResponse, AWSIotMqttQos.QOS0,
                     new AWSIotMqttNewMessageCallback() {
                         @Override
                         public void onMessageArrived(final String topic, final byte[] data) {
-                            if(topic.equals(espTopic)){
+                            if(topic.equals(espTopicResponse)){
                                 serverCallback.onServerCallback(true,"SUCCESS");
                             }
                         }
@@ -158,6 +161,8 @@ public class AwsIotCoreManager {
         } catch (Exception e) {
             Log.e(TAG, "Subscription error.", e);
         }
+
+        mqttManager.publishString(message, espTopic, AWSIotMqttQos.QOS0);
 
     }
 

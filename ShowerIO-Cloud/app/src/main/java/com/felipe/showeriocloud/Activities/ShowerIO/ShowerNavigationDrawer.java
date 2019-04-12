@@ -167,12 +167,6 @@ public class ShowerNavigationDrawer extends AppCompatActivity
         switch (item.getItemId()) {
             case R.id.nav_find_devices:
                 fragmentClass = SearchForDevicesFragment.class;
-              /*  Intent findDevices = new Intent(ShowerNavigationDrawer.this, SearchForDevices.class);
-                startActivity(findDevices);
-                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
-                finish();*/
-            case R.id.nav_manage:
-//                fragmentClass = SecondFragment.class;
                 break;
             case R.id.nav_help:
                 fragmentClass = HelpFragment.class;
@@ -293,6 +287,12 @@ public class ShowerNavigationDrawer extends AppCompatActivity
 
         }
 
+    }
+
+    @Override
+    public void onResetedDevice() {
+        fragmentChanger(navigationView.getMenu().getItem(1), SearchForDevicesFragment.class);
+        navigationView.getMenu().getItem(0).setChecked(false);
     }
 
     @Override

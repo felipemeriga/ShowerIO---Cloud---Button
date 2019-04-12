@@ -23,9 +23,18 @@ boolean updateBathStatistics(int bathDuration, int liters) {
   message = "{\"microprocessorId\": \"" + microprocessorId + "\", " ;
   message = message + "\"liters\": \"" + liters + "\", " ;
   message = message + "\"bathDuration\": \"" + bathDuration + "\"}" ;
-//  strcpy(buf, message.c_str());
-//  int rc = client.publish(aws_statistics_topic, buf);
+    strcpy(buf, message.c_str());
+    int rc = client.publish(aws_statistics_topic, buf);
 
+}
+
+
+void sendResponseToAppCheck() {
+  String message;
+  message = "Connected!" ;
+  char buf[100];
+  strcpy(buf, message.c_str());
+  int rc = client.publish(aws_topic_check_response, buf);
 }
 
 

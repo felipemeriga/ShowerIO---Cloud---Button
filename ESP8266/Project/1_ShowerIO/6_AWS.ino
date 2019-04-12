@@ -129,8 +129,12 @@ void callback(char* topic, byte* payload, unsigned int length) {
     setWaitTime(waitTime);
     setStoppedTime(stoppedTime);
   }
-  if (topicString.equals("configuration")) {
+  if (topicString.equals(aws_topic_conf)) {
     WiFi.disconnect();
+  }
+
+   if (topicString.equals((String)ESP.getChipId() + "/check")) {
+    sendResponseToAppCheck();
   }
   DBG_OUTPUT_PORT.println();
 }
@@ -175,6 +179,7 @@ void subscribe () {
   client.subscribe(aws_topic_times);
   client.subscribe(aws_topic_conf);
   client.subscribe(aws_statistics_topic);
+  client.subscribe(aws_topic_check);
   //subscript to a topic
 DBG_OUTPUT_PORT.println(aws_topic_times);
 DBG_OUTPUT_PORT.println(aws_topic_conf);
