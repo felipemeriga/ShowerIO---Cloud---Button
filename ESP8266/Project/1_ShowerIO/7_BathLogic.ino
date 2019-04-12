@@ -53,7 +53,7 @@ void bathTimeReached(MillisTimer &mt) {
   digitalWrite(rele, LOW);
   digitalWrite(Led_Aviso, LOW);
 
-  bathWaitingTimer.setInterval(10 * 1000);
+  bathWaitingTimer.setInterval(0);
   bathWaitingTimer.expiredHandler(bathWaitTimerReached);
   bathWaitingTimer.start();
   DBG_OUTPUT_PORT.println("Bath time reached! Triggering the wait time of: " + (String)bathWaitTime);

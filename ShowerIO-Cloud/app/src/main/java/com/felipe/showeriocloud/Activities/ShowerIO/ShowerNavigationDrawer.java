@@ -27,6 +27,7 @@ import android.widget.Toast;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GetDetailsHandler;
+import com.felipe.showeriocloud.Activities.Authentication.SignupActivity;
 import com.felipe.showeriocloud.Activities.Fragments.HelpFragment;
 import com.felipe.showeriocloud.Activities.Fragments.ProfileFragment;
 import com.felipe.showeriocloud.Activities.Fragments.SearchForDevicesFragment;
@@ -169,7 +170,10 @@ public class ShowerNavigationDrawer extends AppCompatActivity
                 fragmentClass = SearchForDevicesFragment.class;
                 break;
             case R.id.nav_help:
-                fragmentClass = HelpFragment.class;
+                Intent listOfDevices = new Intent(ShowerNavigationDrawer.this, Walkthrough.class);
+                startActivity(listOfDevices);
+                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+                finish();
                 break;
             case R.id.nav_account:
                 fragmentClass = ProfileFragment.class;

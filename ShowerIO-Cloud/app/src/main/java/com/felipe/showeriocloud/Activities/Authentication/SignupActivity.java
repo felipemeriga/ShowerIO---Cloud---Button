@@ -32,6 +32,7 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.Authentic
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.SignUpHandler;
 import com.felipe.showeriocloud.Activities.Home.SplashScreen;
 import com.felipe.showeriocloud.Activities.ShowerIO.ShowerNavigationDrawer;
+import com.felipe.showeriocloud.Activities.ShowerIO.Walkthrough;
 import com.felipe.showeriocloud.Aws.AuthorizationHandle;
 import com.felipe.showeriocloud.Aws.AwsDynamoDBManager;
 import com.felipe.showeriocloud.Aws.CognitoIdentityPoolManager;
@@ -170,7 +171,7 @@ public class SignupActivity extends AppCompatActivity {
                     @Override
                     public void onServerCallbackObject(Boolean status, String response, List<Object> objects) {
                         // TODO - CREATE A TRY CATCH AND RETURN != NULL IF THERE IS A CONNECTION ERROR
-                        Intent listOfDevices = new Intent(SignupActivity.this, ShowerNavigationDrawer.class);
+                        Intent listOfDevices = new Intent(SignupActivity.this, Walkthrough.class);
                         startActivity(listOfDevices);
                         overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
                         finish();
