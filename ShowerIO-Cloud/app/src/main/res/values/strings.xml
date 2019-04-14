@@ -19,8 +19,8 @@
     <string name="statistics">Estatísticas </string>
     <string name="quit">Sair </string>
     <string name="noName">Sem Nome</string>
-    <string name="facebook_app_id">382122962335824</string>
-    <string name="fb_login_protocol_scheme">fb382122962335824</string>
+    <string name="facebook_app_id">331304907526281</string>
+    <string name="fb_login_protocol_scheme">fb331304907526281</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="dialog_name">Nome</string>
     <string name="dialog_name_hint">Escolha um nome para o dispositivo</string>

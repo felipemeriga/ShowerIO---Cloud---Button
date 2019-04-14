@@ -28,6 +28,8 @@ import com.felipe.showeriocloud.Utils.ServerCallback;
 
 public class SignOutFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
+    private SharedPreferences sharedPreferences;
+    private static final String SHOWERLITE = "ShowerLite";
 
     public SignOutFragment() {
         // Required empty public constructor
@@ -44,6 +46,7 @@ public class SignOutFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_signout, container, false);
+        sharedPreferences = getActivity().getSharedPreferences(SHOWERLITE, getContext().MODE_PRIVATE);
         onSignOutPressed();
         return view;
     }
@@ -86,6 +89,11 @@ public class SignOutFragment extends Fragment {
             public void onClick(DialogInterface dialog, int which) {
                 PreferenceManager.getDefaultSharedPreferences(getContext()).
                         edit().clear().apply();
+                sharedPreferences.edit().remove("email").commit();
+                sharedPreferences.edit().remove("password").commit();
+                SharedPreferences.Editor editor = getActivity().getSharedPreferences(SHOWERLITE,getContext().MODE_PRIVATE).edit();
+                editor.putString("sign","NOT_SIGNED");
+                editor.apply();
                 if(AuthorizationHandle.mainAuthMethod.equals(AuthorizationHandle.FEDERATED_IDENTITIES)){
                     CognitoSyncClientManager.credentialsProvider.clearCredentials();
                     CognitoSyncClientManager.credentialsProvider.clear();

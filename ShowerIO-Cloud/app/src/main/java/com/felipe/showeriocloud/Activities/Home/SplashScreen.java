@@ -69,12 +69,13 @@ public class SplashScreen extends AppCompatActivity {
         //AuthorizationHandle.mainAuthMethod = AuthorizationHandle.NOT_SIGNED;
         setContentView(R.layout.activity_home);
         sharedPreferences = getSharedPreferences(SHOWERLITE, MODE_PRIVATE);
+        final SharedPreferences.Editor editor = getSharedPreferences(SHOWERLITE, MODE_PRIVATE).edit();
 
         /**
          * Initializes the sync client. This must be call before you can use it.
          */
         AuthorizationHandle.initializeAuthMethods(getApplicationContext());
-        AuthorizationHandle.verifySignedAccounts();
+        AuthorizationHandle.verifySignedAccounts(sharedPreferences,editor);
 
 //        AWSMobileClient.getInstance().initialize(this, new AWSStartupHandler() {
 //            @Override
@@ -90,6 +91,8 @@ public class SplashScreen extends AppCompatActivity {
                             String password = sharedPreferences.getString("password", null);
                             if(email == null || password == null){
                                 Log.d(TAG, "There isn't a saved email and password in shared preferences, going to LoginActivity");
+                                editor.putString("sign","NOT_SIGNED");
+                                editor.apply();
                                 Intent loginActivity = new Intent(SplashScreen.this, LoginActivity.class);
                                 startActivity(loginActivity);
                                 CognitoSyncClientManager.credentialsProvider.clearCredentials();
@@ -98,7 +101,8 @@ public class SplashScreen extends AppCompatActivity {
                             } else {
                                 CognitoUser user = CognitoIdentityPoolManager.getPool().getCurrentUser();
                                 user.getSessionInBackground(authenticationHandler);
-
+                                editor.putString("sign","COGNITO_POOL");
+                                editor.apply();
 
                             }
 
@@ -115,12 +119,16 @@ public class SplashScreen extends AppCompatActivity {
                                            if (CognitoSyncClientManager.credentialsProvider.getCredentials().getSessionToken().isEmpty()) {
                                                Toast.makeText(SplashScreen.this, "Error in Facebook login ", Toast.LENGTH_LONG).show();
                                                AuthorizationHandle.mainAuthMethod = AuthorizationHandle.NOT_SIGNED;
+                                               editor.putString("sign","NOT_SIGNED");
+                                               editor.apply();
                                                CognitoSyncClientManager.credentialsProvider.clearCredentials();
                                                CognitoSyncClientManager.credentialsProvider.clear();
                                                Intent loginActivity = new Intent(SplashScreen.this, LoginActivity.class);
                                                startActivity(loginActivity);
                                                finish();
                                            } else {
+                                               editor.putString("sign","FEDERATED_IDENTITIES");
+                                               editor.apply();
                                                AuthorizationHandle.mainAuthMethod = AuthorizationHandle.FEDERATED_IDENTITIES;
                                                AuthorizationHandle.setCredentialsProvider(getApplicationContext());
 
@@ -174,6 +182,9 @@ public class SplashScreen extends AppCompatActivity {
         @Override
         public void onSuccess(CognitoUserSession cognitoUserSession, CognitoDevice device) {
             Log.d(TAG, " -- Auth Success");
+            final SharedPreferences.Editor editor = getSharedPreferences(SHOWERLITE, MODE_PRIVATE).edit();
+            editor.putString("sign","COGNITO_POOL");
+            editor.apply();
             CognitoIdentityPoolManager.setCurrSession(cognitoUserSession);
             CognitoIdentityPoolManager.newDevice(device);
             AuthorizationHandle.setCredentialsProvider(getApplicationContext());

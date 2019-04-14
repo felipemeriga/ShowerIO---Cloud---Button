@@ -255,6 +255,7 @@ public class SignupActivity extends AppCompatActivity {
             SharedPreferences.Editor editor = getSharedPreferences(SHOWERLITE, MODE_PRIVATE).edit();
             editor.putString("email",_emailText.getText().toString());
             editor.putString("password",_passwordText.getText().toString());
+            editor.putString("sign","COGNITO_POOL");
             editor.apply();
             showDialogMessage("Cadastro","Usuário salvo com sucesso!",false);
 

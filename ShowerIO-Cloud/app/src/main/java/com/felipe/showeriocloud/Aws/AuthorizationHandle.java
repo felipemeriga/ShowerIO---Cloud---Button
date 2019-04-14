@@ -1,12 +1,14 @@
 package com.felipe.showeriocloud.Aws;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes;
 import com.facebook.AccessToken;
+import com.facebook.share.Share;
 import com.felipe.showeriocloud.Utils.FacebookInformationSeeker;
 
 public class AuthorizationHandle {
@@ -29,22 +31,29 @@ public class AuthorizationHandle {
         CognitoIdentityPoolManager.init(context);
     }
 
-    public static void verifySignedAccounts() {
-
-        CognitoUser user = CognitoIdentityPoolManager.getPool().getCurrentUser();
-        String username = user.getUserId();
-        if (username != null) {
-            mainAuthMethod = COGNITO_POOL;
-            return;
+    public static void verifySignedAccounts(SharedPreferences sharedPreferences, SharedPreferences.Editor editor) {
+        String signStatus = sharedPreferences.getString("sign", null);
+        if(signStatus != null){
+            if (signStatus.equals(FEDERATED_IDENTITIES)) {
+                final AccessToken fbAccessToken = AccessToken.getCurrentAccessToken();
+                new FacebookInformationSeeker.GetFbInformation(fbAccessToken).execute();
+                if (fbAccessToken != null) {
+                    mainAuthMethod = FEDERATED_IDENTITIES;
+                    return;
+                }
+            } else if (signStatus.equals(COGNITO_POOL)) {
+                CognitoUser user = CognitoIdentityPoolManager.getPool().getCurrentUser();
+                String username = user.getUserId();
+                if (username != null) {
+                    mainAuthMethod = COGNITO_POOL;
+                    return;
+                }
+            }
         }
 
-        final AccessToken fbAccessToken = AccessToken.getCurrentAccessToken();
-        new FacebookInformationSeeker.GetFbInformation(fbAccessToken).execute();
-        if (fbAccessToken != null) {
-            mainAuthMethod = FEDERATED_IDENTITIES;
-            return;
-        }
 
+        editor.putString("sign",NOT_SIGNED);
+        editor.apply();
         mainAuthMethod = NOT_SIGNED;
     }
 
@@ -63,12 +72,12 @@ public class AuthorizationHandle {
     }
 
     public static void setSession() {
-        if(mainAuthMethod.equals(FEDERATED_IDENTITIES)){
+        if (mainAuthMethod.equals(FEDERATED_IDENTITIES)) {
             final AccessToken fbAccessToken = AccessToken.getCurrentAccessToken();
             new FacebookInformationSeeker.GetFbInformation(fbAccessToken).execute();
             setFacebookSession(fbAccessToken);
 
-        } else if(mainAuthMethod.equals(COGNITO_POOL)){
+        } else if (mainAuthMethod.equals(COGNITO_POOL)) {
             setCognitoPoolSession();
         }
     }

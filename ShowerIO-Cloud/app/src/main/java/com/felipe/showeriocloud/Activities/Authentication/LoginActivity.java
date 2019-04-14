@@ -181,6 +181,9 @@ public class LoginActivity extends AppCompatActivity {
                 LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
                     @Override
                     public void onSuccess(LoginResult loginResult) {
+                        final SharedPreferences.Editor editor = getSharedPreferences(SHOWERLITE, MODE_PRIVATE).edit();
+                        editor.putString("sign","FEDERATED_IDENTITIES");
+                        editor.apply();
                         final AccessToken fbAccessToken = AccessToken.getCurrentAccessToken();
                         new FacebookInformationSeeker.GetFbInformation(fbAccessToken).execute();
                         setFacebookSession(loginResult.getAccessToken());
@@ -336,11 +339,12 @@ public class LoginActivity extends AppCompatActivity {
     AuthenticationHandler authenticationHandler = new AuthenticationHandler() {
         @Override
         public void onSuccess(CognitoUserSession cognitoUserSession, CognitoDevice device) {
+            final SharedPreferences.Editor editor = getSharedPreferences(SHOWERLITE, MODE_PRIVATE).edit();
+            editor.putString("sign","COGNITO_POOL");
             Log.d(TAG, " -- Auth Success");
             CognitoIdentityPoolManager.setCurrSession(cognitoUserSession);
             CognitoIdentityPoolManager.newDevice(device);
             CognitoIdentityPoolManager.setUser(_emailText.getText().toString());
-            SharedPreferences.Editor editor = getSharedPreferences(SHOWERLITE, MODE_PRIVATE).edit();
             editor.putString("email",_emailText.getText().toString());
             editor.putString("password",_passwordText.getText().toString());
             editor.apply();
