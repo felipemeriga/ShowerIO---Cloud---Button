@@ -1,5 +1,4 @@
 //DEFINES AND FUNCTION PROTOTYPES
-
 #include <ESP8266WiFi.h>
 #include "ESP8266HTTPClient.h"
 #include <WiFiClient.h>
@@ -13,6 +12,7 @@
 #include <WiFiUdp.h>
 #include <Stream.h>
 #include <MillisTimer.h>
+
 
 //AWS
 #include "sha256.h"
@@ -75,6 +75,13 @@ MillisTimer bathBlinkTimmer = MillisTimer(1000);
 MillisTimer bathBuzzerTimmer = MillisTimer(1000);
 MillisTimer connectionBlinkTimmer = MillisTimer(1000);
 MillisTimer connectTimmer = MillisTimer(1000);
+void bathWaitTimerReached(MillisTimer &mt);
+void bathTimeReached(MillisTimer &mt);
+void bathStoppedTimerReached(MillisTimer &mt);
+void bathBlinkTimerReached(MillisTimer &mt);
+void buzzerTimerReached(MillisTimer &mt);
+void blinkingConnectionReached(MillisTimer &mt);
+
 
 int bathRemainingTime;
 int stopRemainingTime;
@@ -130,6 +137,7 @@ byte reconnectionRetry = EEPROM.read(address_reconnection);
 
 ESP8266WebServer server(80);
 WiFiEventHandler mDisconnectHandler;
+void onDisconnected(const WiFiEventStationModeDisconnected& event);
 
 // TODO - Verify if all these functions will be used
 //API REST Mapping Functions
