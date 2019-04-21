@@ -1,6 +1,6 @@
 <resources>
     <string name="ForgotMenu">Esqueci minha senha</string>
-    <string name="app_name">ShowerIO</string>
+    <string name="app_name">IO-Shower</string>
     <string name="title_activity_search_for_devices">searchForDevices</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
@@ -49,8 +49,8 @@
     <string name="title_activity_shower_base"></string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">ShowerIO</string>
-    <string name="nav_header_subtitle">www.showerio.com.br</string>
+    <string name="nav_header_title">IO-Shower</string>
+    <string name="nav_header_subtitle">www.ioshower.com.br</string>
     <string name="nav_header_desc">Navigation header</string>
 
 
@@ -76,7 +76,7 @@
 
     <!--Reset the shower-->
     <string name="reset_title">Resetar o dispositivo</string>
-    <string name="reset_text">Resetar irá desconectar seu ShowerIO de sua rede wifi atual, você realmente deseja resetar?</string>
+    <string name="reset_text">Resetar irá desconectar seu IO-Shower de sua rede wifi atual, você realmente deseja resetar?</string>
     <string name="reset_fail">Não foi possível resetar o dispositivo</string>
 
     <!--Delete the shower-->
@@ -138,7 +138,6 @@
     <string name="price">R$ 0</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_forgot_password">ForgotPassword</string>
 
 

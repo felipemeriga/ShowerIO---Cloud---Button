@@ -191,7 +191,7 @@ public class EsptouchAsyncTask4 extends AsyncTask<byte[], Void, List<IEsptouchRe
                                                                     }
                                                                 })
                                                                 .create();
-                                                        awsErrorDialog.setMessage("Houve um erro com nossos servidores, resete seu ShowerIO apertando o botão traseiro, e tente novamente");
+                                                        awsErrorDialog.setMessage("Houve um erro com nossos servidores, resete seu IO-Shower apertando o botão traseiro, e tente novamente");
                                                         awsErrorDialog.show();
                                                     }
 
