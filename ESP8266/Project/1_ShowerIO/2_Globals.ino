@@ -81,7 +81,7 @@ void bathStoppedTimerReached(MillisTimer &mt);
 void bathBlinkTimerReached(MillisTimer &mt);
 void buzzerTimerReached(MillisTimer &mt);
 void blinkingConnectionReached(MillisTimer &mt);
-
+static unsigned long last_interrupt_time;
 
 int bathRemainingTime;
 int stopRemainingTime;

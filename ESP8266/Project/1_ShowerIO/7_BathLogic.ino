@@ -35,7 +35,7 @@ void bathWaitTimerReached(MillisTimer &mt) {
   bathWaitingTimer.setInterval(10 * 1000);
   bathStopTimer.setInterval(20 * 1000);
 
-  if(resetAfterBath) {
+  if (resetAfterBath) {
     DBG_OUTPUT_PORT.println("Reseting");
     while (1)ESP.restart();
   }
@@ -134,18 +134,23 @@ void startBath() {
 
 
 void buttonPressed () // Interrupt function
-{
-
-  DBG_OUTPUT_PORT.println("Button pressed");
-  if (bathRunning) {
-    if (stopPressed) {
-      stopPressed = false;
-    } else {
-      stopPressed = true;
+{ 
+   unsigned long interrupt_time = millis();
+  // If interrupts come faster than 200ms, assume it's a bounce and ignore
+  if (interrupt_time - last_interrupt_time > 300)
+  {
+    DBG_OUTPUT_PORT.println("Button pressed");
+    if (bathRunning) {
+      if (stopPressed) {
+        stopPressed = false;
+      } else {
+        stopPressed = true;
+      }
+    } else if (waiting == false && bathRunning == false) {
+      startBath();
     }
-  } else if (waiting == false && bathRunning == false) {
-    startBath();
   }
+  last_interrupt_time = interrupt_time;
 
 }
 
@@ -159,6 +164,7 @@ void initBathConfiguration() {
   showerIsOn = false;
   stopPressed = false;
   flow_frequency = 0;
+  last_interrupt_time = 0; 
   l_hour = 0;
   totalFlowFrequency = 0;
 
