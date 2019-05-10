@@ -31,9 +31,9 @@ void bathWaitTimerReached(MillisTimer &mt) {
   bathWaitingTimer.reset();
 
   // Setting the interval again to ensure that it will be available for a new bath with the correct time
-  bathDurationTimer.setInterval((10 * 1000));
-  bathWaitingTimer.setInterval(10 * 1000);
-  bathStopTimer.setInterval(20 * 1000);
+  bathDurationTimer.setInterval(60 * 1000 * bathTime);
+  bathWaitingTimer.setInterval(60 * 1000 * bathWaitTime);
+  bathStopTimer.setInterval(60 * 1000 * bathStoppedTime);
 
   if (resetAfterBath) {
     DBG_OUTPUT_PORT.println("Reseting");
@@ -42,7 +42,7 @@ void bathWaitTimerReached(MillisTimer &mt) {
 }
 
 void bathTimeReached(MillisTimer &mt) {
-  //computeBathStatistics(true);
+  computeBathStatistics(true);
   //The bathTime was reached, turnoff the shower
   bathRunning = false;
   waiting = true;
@@ -53,7 +53,7 @@ void bathTimeReached(MillisTimer &mt) {
   digitalWrite(rele, LOW);
   digitalWrite(Led_Aviso, LOW);
 
-  bathWaitingTimer.setInterval(0);
+  bathWaitingTimer.setInterval(60 * 1000 * bathWaitTime);
   bathWaitingTimer.expiredHandler(bathWaitTimerReached);
   bathWaitingTimer.start();
   DBG_OUTPUT_PORT.println("Bath time reached! Triggering the wait time of: " + (String)bathWaitTime);
@@ -61,7 +61,7 @@ void bathTimeReached(MillisTimer &mt) {
 }
 
 void bathStoppedTimerReached(MillisTimer &mt) {
-  //computeBathStatistics(false);
+  computeBathStatistics(false);
   bathRunning = false;
   waiting = true;
   showerIsOn = false;
@@ -72,7 +72,7 @@ void bathStoppedTimerReached(MillisTimer &mt) {
   digitalWrite(Led_Aviso, LOW);
 
   //TODO - Start wait time decreasing the stopped time reached
-  bathWaitingTimer.setInterval(10 * 1000);
+  bathWaitingTimer.setInterval(60 * 1000 * bathWaitTime);
   bathWaitingTimer.expiredHandler(bathWaitTimerReached);
   bathWaitingTimer.start();
   DBG_OUTPUT_PORT.println("Bath stop reached! Triggering the wait time of: " + (String)bathWaitTime);
@@ -97,7 +97,7 @@ void buzzerTimerReached(MillisTimer &mt) {
 }
 
 void checkRemainingTimeForBuzzer(boolean *buzzerEnabled) {
-  if ((bathDurationTimer.getRemainingTime() < 5000) && (*buzzerEnabled == true)) {
+  if ((bathDurationTimer.getRemainingTime() < 30000) && (*buzzerEnabled == true)) {
     DBG_OUTPUT_PORT.println(bathDurationTimer.getRemainingTime());
     DBG_OUTPUT_PORT.println(bathDurationTimer.isRunning());
     bathBuzzerTimmer.setInterval(3000);
@@ -112,14 +112,14 @@ void checkRemainingTimeForBuzzer(boolean *buzzerEnabled) {
 void startBath() {
   DBG_OUTPUT_PORT.println("Initializing a new bath with max time: " + (String)bathTime);
   // TODO - Decrease with the false alarm time
-  bathDurationTimer.setInterval(10 * 1000);
+  bathDurationTimer.setInterval(60 * 1000 * bathTime);
   bathDurationTimer.expiredHandler(bathTimeReached);
   bathDurationTimer.start();
   showerIsOn = true;
 
   DBG_OUTPUT_PORT.println("The bath stopped time is default set as 1 minutes");
   // TODO - CHANGE TO 60 * 1000 and to variable address_espera
-  bathStopTimer.setInterval(20 * 1000);
+  bathStopTimer.setInterval(bathStoppedTime * 1000 * 60);
   bathStopTimer.expiredHandler(bathStoppedTimerReached);
   // commented, because the time will go out even if the bath is running
   //bathStopTimer.start();
@@ -134,24 +134,25 @@ void startBath() {
 
 
 void buttonPressed () // Interrupt function
-{ 
-   unsigned long interrupt_time = millis();
-  // If interrupts come faster than 200ms, assume it's a bounce and ignore
-  if (interrupt_time - last_interrupt_time > 300)
-  {
-    DBG_OUTPUT_PORT.println("Button pressed");
-    if (bathRunning) {
-      if (stopPressed) {
-        stopPressed = false;
-      } else {
-        stopPressed = true;
+{
+  if (!onSmartConfig) {
+    unsigned long interrupt_time = millis();
+    // If interrupts come faster than 200ms, assume it's a bounce and ignore
+    if (interrupt_time - last_interrupt_time > 300)
+    {
+      DBG_OUTPUT_PORT.println("Button pressed");
+      if (bathRunning) {
+        if (stopPressed) {
+          stopPressed = false;
+        } else {
+          stopPressed = true;
+        }
+      } else if (waiting == false && bathRunning == false) {
+        startBath();
       }
-    } else if (waiting == false && bathRunning == false) {
-      startBath();
     }
+    last_interrupt_time = interrupt_time;
   }
-  last_interrupt_time = interrupt_time;
-
 }
 
 void initBathConfiguration() {
@@ -164,7 +165,7 @@ void initBathConfiguration() {
   showerIsOn = false;
   stopPressed = false;
   flow_frequency = 0;
-  last_interrupt_time = 0; 
+  last_interrupt_time = 0;
   l_hour = 0;
   totalFlowFrequency = 0;
 

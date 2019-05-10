@@ -14,10 +14,15 @@ import android.widget.TextView;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GetDetailsHandler;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
 import com.felipe.showeriocloud.Aws.AuthorizationHandle;
 import com.felipe.showeriocloud.Aws.CognitoIdentityPoolManager;
+import com.felipe.showeriocloud.Model.UserAnalyticsDO;
 import com.felipe.showeriocloud.R;
 import com.felipe.showeriocloud.Utils.FacebookInformationSeeker;
+import com.felipe.showeriocloud.Utils.ServerCallbackObject;
+import com.felipe.showeriocloud.Utils.UserUtils;
 import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
@@ -28,6 +33,10 @@ import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ProfileFragment extends Fragment {
+
+    private UserUtils userUtils;
+    private UserAnalyticsDO userAnalyticsDO;
+    public RequestQueue requestQueue;
 
     @BindView(R.id.profileName)
     public TextView textViewName;
@@ -47,8 +56,13 @@ public class ProfileFragment extends Fragment {
     @BindView(R.id.phoneTextView)
     public TextView phoneTextView;
 
-    private OnFragmentInteractionListener mListener;
+    @BindView(R.id.totalLiters)
+    public TextView profileTotalLiters;
 
+    @BindView(R.id.profileTotalTime)
+    public TextView profileTotalTime;
+
+    private OnFragmentInteractionListener mListener;
 
 
     public ProfileFragment() {
@@ -64,17 +78,38 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-
+        this.userUtils = new UserUtils();
+        this.userAnalyticsDO = new UserAnalyticsDO();
+        this.requestQueue = Volley.newRequestQueue(this.getContext());
         View view = inflater.inflate(R.layout.profile, container, false);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                userUtils.getUserBathAnalytics(requestQueue, new ServerCallbackObject() {
+                    @Override
+                    public void onServerCallbackObject(Boolean status, String response, Object object) {
+                        userAnalyticsDO = (UserAnalyticsDO) object;
+                        profileTotalLiters.setText(userAnalyticsDO.get_totalLiters().toString());
+                        Double totalHours = userAnalyticsDO.get_totalTime().doubleValue() / 60;
+                        totalHours = Math.ceil(totalHours);
+                        profileTotalTime.setText(totalHours.toString());
+                    }
+                });
+
+            }
+
+        }).start();
+
 
         ButterKnife.bind(this, view);
 
-        if(AuthorizationHandle.mainAuthMethod.equals(AuthorizationHandle.FEDERATED_IDENTITIES)){
+        if (AuthorizationHandle.mainAuthMethod.equals(AuthorizationHandle.FEDERATED_IDENTITIES)) {
             textViewName.setText(FacebookInformationSeeker.facebookName);
             Picasso.get().load(FacebookInformationSeeker.facebookProfilePhotoUrl).into(profileImageView);
             linearLayoutPhone.setVisibility(LinearLayout.GONE);
             emailTextView.setText(FacebookInformationSeeker.facebookEmail);
-        } else if(AuthorizationHandle.mainAuthMethod.equals(AuthorizationHandle.COGNITO_POOL)) {
+        } else if (AuthorizationHandle.mainAuthMethod.equals(AuthorizationHandle.COGNITO_POOL)) {
             CognitoIdentityPoolManager.getPool().getUser(CognitoIdentityPoolManager.getPool().getCurrentUser().getUserId()).getDetailsInBackground(detailsHandler);
         }
         return view;

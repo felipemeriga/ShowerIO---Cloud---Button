@@ -13,9 +13,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+
 import com.felipe.showeriocloud.R;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class ForgotPasswordActivity extends AppCompatActivity {
 
@@ -32,19 +34,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forgot_password);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                exit(null, null);
-            }
-        });
-
+        ButterKnife.bind(this);
 
 
     }
@@ -52,7 +42,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
     private void exit(String newPass, String code) {
         Intent intent = new Intent();
-        if(newPass == null || code == null) {
+        if (newPass == null || code == null) {
             newPass = "";
             code = "";
         }

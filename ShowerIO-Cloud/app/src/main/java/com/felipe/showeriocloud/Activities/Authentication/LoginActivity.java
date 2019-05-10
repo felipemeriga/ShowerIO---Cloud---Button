@@ -144,15 +144,12 @@ public class LoginActivity extends AppCompatActivity {
                             Toast.makeText(LoginActivity.this, "Error in Facebook login ", Toast.LENGTH_LONG).show();
                             CognitoSyncClientManager.credentialsProvider.clearCredentials();
                             CognitoSyncClientManager.credentialsProvider.clear();
-
                         } else {
                             AuthorizationHandle.mainAuthMethod = AuthorizationHandle.FEDERATED_IDENTITIES;
                             AuthorizationHandle.setCredentialsProvider(getApplicationContext());
-
                             Log.d(TAG, "CognitoSyncClientManger returned a valid token, user is authenticated, changing activity");
                             initializeAwsServices();
                             //AWSMobileClient.getInstance().setCredentialsProvider(CognitoSyncClientManager.credentialsProvider);
-
                             DevicePersistance.getAllDevicesFromUser(new ServerCallbackObjects() {
                                 @Override
                                 public void onServerCallbackObject(Boolean status, String response, List<Object> objects) {
@@ -407,7 +404,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void onForgotPasswordPressed(View view) {
-       String email = _emailText.getText().toString();
+        String email = _emailText.getText().toString();
 
         if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             _emailText.setError("Entre um endereço de email válido");

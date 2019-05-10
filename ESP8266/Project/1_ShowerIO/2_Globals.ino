@@ -164,3 +164,4 @@ boolean stopPressed;
 boolean showerIsOn;
 boolean waiting;
 boolean resetAfterBath;
+boolean onSmartConfig;

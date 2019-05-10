@@ -1,13 +1,21 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('C:\\Users\\Meriga\\Desktop\\IO-Shower-Beta\\IO-Shower-Beta.jks')
+            storePassword 'iloverpg1'
+            keyAlias = 'ioshower'
+            keyPassword 'meleka1'
+        }
+    }
     compileSdkVersion 27
     defaultConfig {
         applicationId "com.felipe.showeriocloud"
         minSdkVersion 23
         targetSdkVersion 27
-        versionCode 1
-        versionName "1.0"
+        versionCode 3
+        versionName "1.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

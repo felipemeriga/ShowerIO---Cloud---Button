@@ -67,14 +67,15 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="#000000"
-                        android:text="Total de Banhos"
+                        android:text="Tempo total (Horas)"
                         android:textSize="20sp" />
 
                     <TextView
+                        android:id="@+id/profileTotalTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingTop="10dp"
-                        android:text="125"
+                        android:text="0"
                         android:textColor="#000000"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -96,10 +97,11 @@
                         android:textSize="20sp" />
 
                     <TextView
+                        android:id="@+id/totalLiters"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingTop="10dp"
-                        android:text="1205"
+                        android:text="0"
                         android:textColor="#000000"
                         android:textSize="20sp"
                         android:textStyle="bold" />

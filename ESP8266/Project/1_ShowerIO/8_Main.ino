@@ -13,10 +13,10 @@ void blinkingConnectionReached(MillisTimer &mt) {
 
 void onDisconnected(const WiFiEventStationModeDisconnected& event)
 {
-  DBG_OUTPUT_PORT.println("Disconnected!!!");
-  DBG_OUTPUT_PORT.println("Restarting ESP");
-  while (1)ESP.restart();
-  delay(500);
+  //  DBG_OUTPUT_PORT.println("Disconnected!!!");
+  //  DBG_OUTPUT_PORT.println("Restarting ESP");
+  //  while (1)ESP.restart();
+  //  delay(500);
 }
 
 void startConnectionSettings() {
@@ -85,6 +85,7 @@ void configureGPIO(void) {
 
 
 void setup(void) {
+  onSmartConfig = false;
   //WiFi.disconnect();
 
   //   deplay for 2 sec for smartConfig
@@ -98,8 +99,9 @@ void setup(void) {
   configureServer();
   initBathConfiguration();
   startConnectionSettings();
+  int cnt = 0;
+
   // set for STA mode
-  bool timeout = true;
   WiFi.mode(WIFI_STA);
   if (WiFi.SSID() != NULL) {
     DBG_OUTPUT_PORT.println("Getting last saved Wifi");
@@ -107,54 +109,32 @@ void setup(void) {
     unsigned long start = millis();
     while (millis() - start < 30000) {
       if (WiFi.status() == WL_CONNECTED) {
-        timeout = false;
         break;
       }
       delay(500);
     }
-  }
-  if (timeout) {
-    timeout = true;
-    DBG_OUTPUT_PORT.println("Begin smart config");
+  } else {
     WiFi.beginSmartConfig();
-    unsigned long start = millis();
-    unsigned long waitTime;
-    if (WiFi.SSID() != NULL) {
-      waitTime = 30000;
-    } else {
-      waitTime = 300000;
-    }
-
-    while (millis() - start < waitTime) {
-      if (WiFi.status() == WL_CONNECTED) {
-        DBG_OUTPUT_PORT.println("Connected to a network!");
-        timeout = false;
-        break;
-      }
-      delay(500);
-    }
-
+    //    while (WiFi.status() != WL_CONNECTED) {
+    //      delay(500);
+    //      DBG_OUTPUT_PORT.print(".");
+    //      if (cnt++ >= 15) {
+    //        onSmartConfig = true;
+    //        WiFi.beginSmartConfig();
+    //        while (1) {
+    //          delay(500);
+    //              connectionBlinkTimmer.run();
+    //          if (WiFi.smartConfigDone()) {
+    //            onSmartConfig = false;
+    //            break;
+    //          }
+    //        }
+    //      }
+    //    }
   }
-  if (timeout) {
-    DBG_OUTPUT_PORT.println("Restarting ESP");
-    while (1)ESP.restart();
-    delay(500);
-  }
-  // if wifi cannot connect start smartconfig
-  //  while (WiFi.status() != WL_CONNECTED) {
-  //    delay(500);
-  //    DBG_OUTPUT_PORT.print(".");
-  //    if (cnt++ >= 15) {
-  //      WiFi.beginSmartConfig();
-  //      while (1) {
-  //        delay(500);
-  //        if (WiFi.smartConfigDone()) {
-  //          DBG_OUTPUT_PORT.println("SmartConfig Success");
-  //          break;
-  //        }
-  //      }
-  //    }
-  //  }
+
+  //   if wifi cannot connect start smartconfig
+
 
   DBG_OUTPUT_PORT.println("");
   DBG_OUTPUT_PORT.println("Starting AWS Services and connection");
@@ -171,44 +151,49 @@ void setup(void) {
   awsWSclient.setAWSSecretKey(aws_secret);
   awsWSclient.setUseSSL(true);
 
-  if (connect ()) {
-    subscribe ();
+  if (WiFi.status() == WL_CONNECTED) {
+    if (connect ()) {
+      subscribe ();
+    }
   }
+
 }
 
 void loop(void) {
-  server.handleClient();
   bathProcess();
 
   if (WiFi.status() != WL_CONNECTED) {
     connectionBlinkTimmer.run();
   } else {
+    server.handleClient();
     digitalWrite(connectionLed, LOW);
     connectionBlinkTimmer.reset();
     connectionBlinkTimmer.stop();
+
+    if (awsWSclient.connected ()) {
+      client.loop ();
+    } else {
+      //handle reconnection
+      if (connect ()) {
+        subscribe ();
+      }
+    }
   }
 
   // check if the pushbutton is pressed.
   // if it is, the buttonState is HIGH:
 
 
-  if (awsWSclient.connected ()) {
-    client.loop ();
-  } else {
-    //handle reconnection
-    if (connect ()) {
-      subscribe ();
-    }
-  }
 
-//  // Reset Wifi button
-//  buttonResetState = digitalRead(buttonResetPin);
-//  if (buttonResetState == HIGH) {
-//    // Reset Wifi
-//    WiFi.disconnect();
-//    delay(1000);
-//    while (1)ESP.restart();
-//
-//  }
+
+  //  // Reset Wifi button
+  buttonResetState = digitalRead(buttonResetPin);
+  if (buttonResetState == HIGH) {
+    // Reset Wifi
+    WiFi.disconnect();
+    delay(1000);
+    while (1)ESP.restart();
+
+  }
 
 }
