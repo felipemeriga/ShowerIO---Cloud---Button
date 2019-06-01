@@ -110,6 +110,10 @@ void checkRemainingTimeForBuzzer(boolean *buzzerEnabled) {
 }
 
 void startBath() {
+  bathWaitTime = EEPROM.read(address_wait);
+  bathTime = EEPROM.read(address_time);
+  bathStoppedTime = EEPROM.read(address_stopped);
+
   DBG_OUTPUT_PORT.println("Initializing a new bath with max time: " + (String)bathTime);
   // TODO - Decrease with the false alarm time
   bathDurationTimer.setInterval(60 * 1000 * bathTime);

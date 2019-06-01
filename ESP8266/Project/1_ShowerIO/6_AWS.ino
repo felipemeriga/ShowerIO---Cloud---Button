@@ -33,9 +33,9 @@ char* generateClientID () {
 //
 //
 //
-//    if (client.isConnected ()) {    
+//    if (client.isConnected ()) {
 //        client.disconnect ();
-//    }  
+//    }
 //    //delay is not necessary... it just help us to get a "trustful" heap space value
 //    delay (1000);
 //    Serial.print (millis ());
@@ -133,7 +133,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     WiFi.disconnect();
   }
 
-   if (topicString.equals((String)ESP.getChipId() + "/check")) {
+  if (topicString.equals((String)ESP.getChipId() + "/check")) {
     sendResponseToAppCheck();
   }
   DBG_OUTPUT_PORT.println();
@@ -144,10 +144,10 @@ bool connect () {
 
 
 
-//  if (client.connected()) {
-//    client.disconnect ();
-//  }
-  
+  //  if (client.connected()) {
+  //    client.disconnect ();
+  //  }
+
   DBG_OUTPUT_PORT.print (millis ());
   DBG_OUTPUT_PORT.print (" - conn: ");
   DBG_OUTPUT_PORT.print (++connection);
@@ -176,14 +176,11 @@ bool connect () {
 //subscribe to a mqtt topic
 void subscribe () {
   client.setCallback(callback);
+  //subscript to a topic
   client.subscribe(aws_topic_times);
   client.subscribe(aws_topic_conf);
   client.subscribe(aws_statistics_topic);
   client.subscribe(aws_topic_check);
-  //subscript to a topic
-DBG_OUTPUT_PORT.println(aws_topic_times);
-DBG_OUTPUT_PORT.println(aws_topic_conf);
-  
+
   DBG_OUTPUT_PORT.println("MQTT subscribed");
 }
-

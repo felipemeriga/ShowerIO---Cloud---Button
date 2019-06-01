@@ -62,6 +62,7 @@ const char* aws_topic_conf  = strdup(((String)ESP.getChipId() + "/configuration"
 const char* aws_topic_check  = strdup(((String)ESP.getChipId() + "/check").c_str());
 const char* aws_topic_check_response  = strdup(((String)ESP.getChipId() + "/check/response").c_str());
 const char* aws_statistics_topic  = "statistics";
+const char* aws_bath_params_topic  = "bathParams";
 int port = 443;
 
 //Check Connection Variable

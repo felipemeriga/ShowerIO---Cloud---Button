@@ -23,10 +23,21 @@ boolean updateBathStatistics(int bathDuration, int liters) {
   message = "{\"microprocessorId\": \"" + microprocessorId + "\", " ;
   message = message + "\"liters\": \"" + liters + "\", " ;
   message = message + "\"bathDuration\": \"" + bathDuration + "\"}" ;
-    strcpy(buf, message.c_str());
-    int rc = client.publish(aws_statistics_topic, buf);
+  strcpy(buf, message.c_str());
+  int rc = client.publish(aws_statistics_topic, buf);
 
 }
+
+boolean getBathParams() {
+  String message;
+  String microprocessorId = (String)ESP.getChipId();
+  char buf[100];
+  DBG_OUTPUT_PORT.println("Getting the last bath params saved in the database");
+  message = "{\"microprocessorId\": \"" + microprocessorId +  "\"}" ;
+  strcpy(buf, message.c_str());
+  int rc = client.publish(aws_bath_params_topic, buf);
+}
+
 
 
 void sendResponseToAppCheck() {

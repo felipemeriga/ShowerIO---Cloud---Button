@@ -154,6 +154,7 @@ void setup(void) {
   if (WiFi.status() == WL_CONNECTED) {
     if (connect ()) {
       subscribe ();
+      getBathParams();
     }
   }
 
@@ -176,6 +177,7 @@ void loop(void) {
       //handle reconnection
       if (connect ()) {
         subscribe ();
+        getBathParams();
       }
     }
   }
@@ -186,14 +188,14 @@ void loop(void) {
 
 
 
-  //  // Reset Wifi button
-  buttonResetState = digitalRead(buttonResetPin);
-  if (buttonResetState == HIGH) {
-    // Reset Wifi
-    WiFi.disconnect();
-    delay(1000);
-    while (1)ESP.restart();
-
-  }
+//  //  // Reset Wifi button
+//  buttonResetState = digitalRead(buttonResetPin);
+//  if (buttonResetState == HIGH) {
+//    // Reset Wifi
+//    WiFi.disconnect();
+//    delay(1000);
+//    while (1)ESP.restart();
+//
+//  }
 
 }
