@@ -188,14 +188,14 @@ void loop(void) {
 
 
 
-//  //  // Reset Wifi button
-//  buttonResetState = digitalRead(buttonResetPin);
-//  if (buttonResetState == HIGH) {
-//    // Reset Wifi
-//    WiFi.disconnect();
-//    delay(1000);
-//    while (1)ESP.restart();
-//
-//  }
+  //  // Reset Wifi button
+  buttonResetState = digitalRead(buttonResetPin);
+  if (buttonResetState == HIGH) {
+    // Reset Wifi
+    WiFi.disconnect();
+    delay(1000);
+    while (1)ESP.restart();
+
+  }
 
 }

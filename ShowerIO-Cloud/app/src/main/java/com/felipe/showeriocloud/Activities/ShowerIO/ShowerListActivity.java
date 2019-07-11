@@ -2,15 +2,15 @@ package com.felipe.showeriocloud.Activities.ShowerIO;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
-import android.support.v7.widget.helper.ItemTouchHelper;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.appcompat.app.AppCompatActivity;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import android.widget.Toolbar;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -55,7 +55,7 @@ public class ShowerListActivity extends AppCompatActivity implements RecyclerIte
 
         Log.d(TAG, "onCreate(): Defining and setting Toolbar title and configurations");
         Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+//        setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(getString(R.string.list_showers));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

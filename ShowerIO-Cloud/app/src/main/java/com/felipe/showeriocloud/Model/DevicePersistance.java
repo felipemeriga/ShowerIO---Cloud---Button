@@ -1,21 +1,12 @@
 package com.felipe.showeriocloud.Model;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.support.annotation.Nullable;
-import android.view.View;
-
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBQueryExpression;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBScanExpression;
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.PaginatedList;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
 import com.amazonaws.services.dynamodbv2.model.Condition;
 import com.felipe.showeriocloud.Aws.AuthorizationHandle;
 import com.felipe.showeriocloud.Aws.AwsDynamoDBManager;
-import com.felipe.showeriocloud.Aws.CognitoSyncClientManager;
-import com.felipe.showeriocloud.Utils.FacebookInformationSeeker;
 import com.felipe.showeriocloud.Utils.ServerCallback;
 import com.felipe.showeriocloud.Utils.ServerCallbackObject;
 import com.felipe.showeriocloud.Utils.ServerCallbackObjects;

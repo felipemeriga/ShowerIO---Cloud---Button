@@ -1,24 +1,21 @@
 package com.felipe.showeriocloud.Activities.Home;
 
-import android.app.ProgressDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.amazonaws.mobile.client.AWSMobileClient;
-import com.amazonaws.mobile.client.AWSStartupHandler;
-import com.amazonaws.mobile.client.AWSStartupResult;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoDevice;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserSession;
@@ -28,14 +25,8 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.Chal
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.MultiFactorAuthenticationContinuation;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.AuthenticationHandler;
 import com.facebook.AccessToken;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
-import com.facebook.login.LoginResult;
 import com.felipe.showeriocloud.Activities.Authentication.LoginActivity;
-import com.felipe.showeriocloud.Activities.Authentication.SignupActivity;
-import com.felipe.showeriocloud.Activities.ShowerIO.ShowerListActivity;
 import com.felipe.showeriocloud.Activities.ShowerIO.ShowerNavigationDrawer;
-import com.felipe.showeriocloud.Activities.SmartConfig.SearchForDevices;
 import com.felipe.showeriocloud.Aws.AuthorizationHandle;
 import com.felipe.showeriocloud.Aws.AwsDynamoDBManager;
 import com.felipe.showeriocloud.Aws.CognitoIdentityPoolManager;
@@ -44,13 +35,15 @@ import com.felipe.showeriocloud.Model.DevicePersistance;
 import com.felipe.showeriocloud.R;
 import com.felipe.showeriocloud.Utils.FacebookInformationSeeker;
 import com.felipe.showeriocloud.Utils.ServerCallbackObjects;
-import com.squareup.picasso.Picasso;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.net.URL;
 import java.util.List;
+
+import static com.facebook.login.widget.ProfilePictureView.TAG;
 
 
 public class SplashScreen extends AppCompatActivity {
@@ -65,6 +58,33 @@ public class SplashScreen extends AppCompatActivity {
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "getInstanceId failed", task.getException());
+                            return;
+                        }
+
+                        // Get new Instance ID token
+                        String token = task.getResult().getToken();
+
+                    }
+                });
+
+        FirebaseMessaging.getInstance().subscribeToTopic("weather")
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+
+                        Log.d(TAG, "ae");
+                    }
+                });
+
+
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         //AuthorizationHandle.mainAuthMethod = AuthorizationHandle.NOT_SIGNED;
         setContentView(R.layout.activity_home);
