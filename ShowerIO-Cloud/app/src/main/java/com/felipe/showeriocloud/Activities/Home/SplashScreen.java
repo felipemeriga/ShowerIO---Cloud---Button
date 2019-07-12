@@ -75,12 +75,19 @@ public class SplashScreen extends AppCompatActivity {
                     }
                 });
 
-        FirebaseMessaging.getInstance().subscribeToTopic("weather")
+        FirebaseMessaging.getInstance().subscribeToTopic("curiosity")
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
+                        Log.d(TAG, "Subscribed on notification topic: curiosity");
+                    }
+                });
 
-                        Log.d(TAG, "ae");
+        FirebaseMessaging.getInstance().subscribeToTopic("month")
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Log.d(TAG, "Subscribed on notification topic: month");
                     }
                 });
 

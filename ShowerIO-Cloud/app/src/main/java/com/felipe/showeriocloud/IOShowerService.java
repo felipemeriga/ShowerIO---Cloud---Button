@@ -86,6 +86,7 @@ public class IOShowerService extends FirebaseMessagingService {
 
         int year = Calendar.getInstance().get(Calendar.YEAR);
         int month = Calendar.getInstance().get(Calendar.MONTH);
+        String type = "all";
 
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, CHANNEL_ID)
@@ -94,13 +95,12 @@ public class IOShowerService extends FirebaseMessagingService {
                         .setAutoCancel(true);
 
 
-        statisticsUtils.getMonthlyStatistics(Integer.toString(year), Integer.toString(month), DevicePersistance.selectedDevice, requestQueue, new ServerCallbackObject() {
+        statisticsUtils.getMonthlyStatistics(Integer.toString(year), Integer.toString(month), DevicePersistance.selectedDevice, requestQueue, type, new ServerCallbackObject() {
             @Override
             public void onServerCallbackObject(Boolean status, String response, Object object) {
                 BathStatisticsMonthly bathStatisticsMonthly = (BathStatisticsMonthly) object;
 
-                String totalHoursText = String.valueOf(Math.floor(bathStatisticsMonthly.getTotalTime() / 3600)).split("\\.")[0] + " horas e "
-                        + String.valueOf(Math.floor(Double.parseDouble("0." + Double.toString(bathStatisticsMonthly.getTotalTime() / 3600).split("\\.")[1]) * 60)).split("\\.")[0] + " minutos";
+                String totalHoursText = statisticsUtils.calculateTotalHours(bathStatisticsMonthly);
 
                 String totalLitersText = bathStatisticsMonthly.getTotalLiters().toString() + " litros de água";
 

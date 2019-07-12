@@ -90,10 +90,9 @@ public class StatisticsUtils {
     };
 
 
-
-    public void getMonthlyStatistics(String year, String month, DeviceDO deviceDO, RequestQueue requestQueue, final ServerCallbackObject serverCallbackObject) {
+    public void getMonthlyStatistics(String year, String month, DeviceDO deviceDO, RequestQueue requestQueue, String type, final ServerCallbackObject serverCallbackObject) {
         String ENDPOINT = "https://qhqsyqomla.execute-api.us-east-1.amazonaws.com/tst?";
-        ENDPOINT = ENDPOINT + "microprocessorId=" + deviceDO.getMicroprocessorId() + "&userId=" + deviceDO.getUserId() + "&month=" + month + "&year=" + year;
+        ENDPOINT = ENDPOINT + "microprocessorId=" + deviceDO.getMicroprocessorId() + "&userId=" + deviceDO.getUserId() + "&month=" + month + "&year=" + year + "&type=" + type;
         Log.i(TAG, "getMonthlyStatistics() Doing the HTTP GET request on ENDPOINT: " + ENDPOINT);
         requestQueue.add(new StringRequest(Request.Method.GET, ENDPOINT, onMonthlySuccessful, onMonthlyError));
         this.callbackObject = serverCallbackObject;
@@ -110,7 +109,7 @@ public class StatisticsUtils {
             JsonObject json = (JsonObject) jsonParser.parse(response.toString());
             JsonObject jsonResponse = (JsonObject) json.get("body");
             BathStatisticsMonthly bathStatisticsMonthly = gson.fromJson(jsonResponse.toString(), BathStatisticsMonthly.class);
-            callbackObject.onServerCallbackObject(true,"SUCCESS", bathStatisticsMonthly);
+            callbackObject.onServerCallbackObject(true, "SUCCESS", bathStatisticsMonthly);
 
         }
 
@@ -121,8 +120,15 @@ public class StatisticsUtils {
         @Override
         public void onErrorResponse(VolleyError error) {
             Log.i(TAG, "onPostsError() Something wrong happened with the request. Error: " + error.getMessage());
-            callbackObject.onServerCallbackObject(false,error.getMessage(),null);
+            callbackObject.onServerCallbackObject(false, error.getMessage(), null);
         }
     };
+
+    public String calculateTotalHours(BathStatisticsMonthly bathStatisticsMonthly) {
+
+        return String.valueOf(Math.floor(bathStatisticsMonthly.getTotalTime() / 3600)).split("\\.")[0] + " horas e "
+                + String.valueOf(Math.floor(Double.parseDouble("0." + Double.toString(bathStatisticsMonthly.getTotalTime() / 3600).split("\\.")[1]) * 60)).split("\\.")[0] + " minutos";
+
+    }
 
 }

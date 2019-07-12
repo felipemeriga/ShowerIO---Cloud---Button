@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "696918394177",
+    "firebase_url": "https://io-shower.firebaseio.com",
+    "project_id": "io-shower",
+    "storage_bucket": "io-shower.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:696918394177:android:c1abb7aff974e122",
+        "android_client_info": {
+          "package_name": "com.felipe.showeriocloud"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "696918394177-ji1rbv8f02ghufg685v3c63h163efgai.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.felipe.showeriocloud",
+            "certificate_hash": "85b9ff5d93c22114a7726b3bb37ab3158bf584b6"
+          }
+        },
+        {
+          "client_id": "696918394177-isnb48pf26lgooq2ajums08siffomsco.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDryE1PYpN3raCMUxyyB01kt0BDVFjROsc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "696918394177-isnb48pf26lgooq2ajums08siffomsco.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
