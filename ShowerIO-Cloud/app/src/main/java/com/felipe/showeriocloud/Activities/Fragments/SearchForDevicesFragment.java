@@ -397,6 +397,13 @@ public class SearchForDevicesFragment extends Fragment implements View.OnClickLi
                                 registerNewDevices.createNewDevice(item, requestQueue, new ServerCallback() {
                                     @Override
                                     public void onServerCallback(final boolean status, String response) {
+
+                                        getActivity().runOnUiThread(new Runnable() {
+                                            public void run() {
+                                                getActivity().unregisterReceiver(mReceiver);
+                                            }
+                                        });
+
                                         if (!status) {
                                             Snackbar snackbar = Snackbar
                                                     .make(relativeLayout, "Erro ao contatar o servidor, tente novamente!", Snackbar.LENGTH_LONG)
@@ -423,7 +430,7 @@ public class SearchForDevicesFragment extends Fragment implements View.OnClickLi
                     }
                 });
             }
-        }, SPLASH_TIME_OUT);
+        }, 20);
 
 
     }

@@ -49,7 +49,7 @@
             <!-- Row 1 -->
 
             <!-- Column 1 -->
-            <android.support.v7.widget.CardView
+            <androidx.cardview.widget.CardView
                 android:id="@+id/cardViewDaily"
                 app:cardCornerRadius="8dp"
                 app:cardElevation="8dp"
@@ -86,10 +86,10 @@
 
                 </LinearLayout>
 
-            </android.support.v7.widget.CardView>
+            </androidx.cardview.widget.CardView>
 
             <!-- Column 2 -->
-            <android.support.v7.widget.CardView
+            <androidx.cardview.widget.CardView
                 android:id="@+id/cardViewMonthly"
                 app:cardCornerRadius="8dp"
                 app:cardElevation="8dp"
@@ -126,7 +126,7 @@
 
                 </LinearLayout>
 
-            </android.support.v7.widget.CardView>
+            </androidx.cardview.widget.CardView>
 
 
         </GridLayout>

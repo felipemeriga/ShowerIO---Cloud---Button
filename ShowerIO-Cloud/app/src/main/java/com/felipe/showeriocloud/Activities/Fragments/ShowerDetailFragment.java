@@ -191,10 +191,9 @@ public class ShowerDetailFragment extends Fragment {
                             checkConnection();
                         } else {
                             mqttProgressDialog.dismiss();
-                            Toast toast = new Toast(getContext());
-                            toast.setText(R.string.mqtt_conection_failed);
-                            toast.setDuration(Toast.LENGTH_LONG);
-                            toast.show();
+                            //Toast toast = new Toast(getContext());
+                            Toast.makeText(getContext(),R.string.mqtt_conection_failed, Toast.LENGTH_LONG).show();
+                            //toast.show();
                             Intent listOfDevices = new Intent(getContext(), ShowerNavigationDrawer.class);
                             startActivity(listOfDevices);
                             getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);

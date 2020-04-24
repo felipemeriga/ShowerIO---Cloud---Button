@@ -84,13 +84,97 @@ void configureGPIO(void) {
 }
 
 
+void setup_wifi(void) {
+  int cnt = 0;
+  espClient.setBufferSizes(512, 512);
+
+  // set for STA mode
+  WiFi.mode(WIFI_STA);
+  // if wifi cannot connect start smartconfig
+  while (WiFi.status() != WL_CONNECTED && WiFi.SSID() == "") {
+    delay(500);
+    Serial.print(".");
+    if (cnt++ >= 15) {
+      WiFi.beginSmartConfig();
+      while (1) {
+        delay(500);
+        if (WiFi.smartConfigDone()) {
+          Serial.println("SmartConfig Success");
+          break;
+        }
+      }
+    }
+  }
+
+  timeClient.begin();
+  while (!timeClient.update()) {
+    timeClient.forceUpdate();
+  }
+
+  espClient.setX509Time(timeClient.getEpochTime());
+}
+
+void load_certificates(void) {
+  if (!SPIFFS.begin()) {
+    DBG_OUTPUT_PORT.println("Failed to mount file system");
+    return;
+  }
+
+  DBG_OUTPUT_PORT.print("Heap: "); Serial.println(ESP.getFreeHeap());
+
+  // Load certificate file
+  File cert = SPIFFS.open("/cert.der", "r"); //replace cert.crt eith your uploaded file name
+  if (!cert) {
+    DBG_OUTPUT_PORT.println("Failed to open cert file");
+  }
+  else
+    DBG_OUTPUT_PORT.println("Success to open cert file");
+
+  delay(1000);
+
+  if (espClient.loadCertificate(cert))
+    DBG_OUTPUT_PORT.println("cert loaded");
+  else
+    DBG_OUTPUT_PORT.println("cert not loaded");
+
+  // Load private key file
+  File private_key = SPIFFS.open("/private.der", "r"); //replace private eith your uploaded file name
+  if (!private_key) {
+    DBG_OUTPUT_PORT.println("Failed to open private cert file");
+  }
+  else
+    DBG_OUTPUT_PORT.println("Success to open private cert file");
+
+  delay(1000);
+
+  if (espClient.loadPrivateKey(private_key))
+    DBG_OUTPUT_PORT.println("private key loaded");
+  else
+    DBG_OUTPUT_PORT.println("private key not loaded");
+
+  // Load CA file
+  File ca = SPIFFS.open("/ca.der", "r"); //replace ca eith your uploaded file name
+  if (!ca) {
+    DBG_OUTPUT_PORT.println("Failed to open ca ");
+  }
+  else
+    DBG_OUTPUT_PORT.println("Success to open ca");
+
+  delay(1000);
+
+  if (espClient.loadCACert(ca))
+    DBG_OUTPUT_PORT.println("ca loaded");
+  else
+    DBG_OUTPUT_PORT.println("ca failed");
+
+  DBG_OUTPUT_PORT.print("Heap: "); Serial.println(ESP.getFreeHeap());
+
+
+}
+
 void setup(void) {
   onSmartConfig = false;
-  //WiFi.disconnect();
-
-  //   deplay for 2 sec for smartConfig
-  //  Serial.println("2 sec before clear SmartConfig");
-  //  delay(2000);
+//  WiFi.disconnect();
 
   DBG_OUTPUT_PORT.begin(115200);
   DBG_OUTPUT_PORT.print("\n");
@@ -99,70 +183,21 @@ void setup(void) {
   configureServer();
   initBathConfiguration();
   startConnectionSettings();
-  int cnt = 0;
-
-  // set for STA mode
-  WiFi.mode(WIFI_STA);
-  if (WiFi.SSID() != NULL) {
-    DBG_OUTPUT_PORT.println("Getting last saved Wifi");
-    WiFi.begin(WiFi.SSID().c_str(), WiFi.psk().c_str());
-    unsigned long start = millis();
-    while (millis() - start < 30000) {
-      if (WiFi.status() == WL_CONNECTED) {
-        break;
-      }
-      delay(500);
-    }
-  } else {
-    WiFi.beginSmartConfig();
-    //    while (WiFi.status() != WL_CONNECTED) {
-    //      delay(500);
-    //      DBG_OUTPUT_PORT.print(".");
-    //      if (cnt++ >= 15) {
-    //        onSmartConfig = true;
-    //        WiFi.beginSmartConfig();
-    //        while (1) {
-    //          delay(500);
-    //              connectionBlinkTimmer.run();
-    //          if (WiFi.smartConfigDone()) {
-    //            onSmartConfig = false;
-    //            break;
-    //          }
-    //        }
-    //      }
-    //    }
-  }
-
-  //   if wifi cannot connect start smartconfig
+  setup_wifi();
+  delay(3000);
+  load_certificates();
 
 
   DBG_OUTPUT_PORT.println("");
   DBG_OUTPUT_PORT.println("Starting AWS Services and connection");
-
+  DBG_OUTPUT_PORT.println(WiFi.SSID());
   WiFi.printDiag(DBG_OUTPUT_PORT);
-
-  // Print the IP address
-  DBG_OUTPUT_PORT.println(WiFi.localIP());
-
-  //fill AWS parameters
-  awsWSclient.setAWSRegion(aws_region);
-  awsWSclient.setAWSDomain(aws_endpoint);
-  awsWSclient.setAWSKeyID(aws_key);
-  awsWSclient.setAWSSecretKey(aws_secret);
-  awsWSclient.setUseSSL(true);
-
-  if (WiFi.status() == WL_CONNECTED) {
-    if (connect ()) {
-      subscribe ();
-      getBathParams();
-    }
-  }
-
 }
 
 void loop(void) {
-  bathProcess();
 
+  bathProcess();
+  
   if (WiFi.status() != WL_CONNECTED) {
     connectionBlinkTimmer.run();
   } else {
@@ -171,31 +206,22 @@ void loop(void) {
     connectionBlinkTimmer.reset();
     connectionBlinkTimmer.stop();
 
-    if (awsWSclient.connected ()) {
-      client.loop ();
-    } else {
-      //handle reconnection
-      if (connect ()) {
-        subscribe ();
-        getBathParams();
-      }
+    if (!client.connected()) {
+      reconnect();
     }
   }
 
+  client.loop();
+
   // check if the pushbutton is pressed.
   // if it is, the buttonState is HIGH:
-
-
-
-
-  //  // Reset Wifi button
-  buttonResetState = digitalRead(buttonResetPin);
-  if (buttonResetState == HIGH) {
-    // Reset Wifi
-    WiFi.disconnect();
-    delay(1000);
-    while (1)ESP.restart();
-
-  }
-
+  //  //  // Reset Wifi button
+  //  buttonResetState = digitalRead(buttonResetPin);
+  //  if (buttonResetState == HIGH) {
+  //    // Reset Wifi
+  //    WiFi.disconnect();
+  //    delay(1000);
+  //    while (1)ESP.restart();
+  //
+  //  }
 }

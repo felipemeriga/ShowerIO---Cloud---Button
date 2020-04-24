@@ -12,6 +12,7 @@
 #include <WiFiUdp.h>
 #include <Stream.h>
 #include <MillisTimer.h>
+#include <ArduinoOTA.h>
 
 
 //AWS
@@ -28,6 +29,7 @@
 #include <IPStack.h>
 #include <Countdown.h>
 #include <MQTTClient.h>
+#include <NTPClient.h>
 
 
 //HTTP REQUESTS
@@ -41,21 +43,26 @@ HTTPClient http;
 #include <AWSWebSocketClient.h>
 #include "CircularByteBuffer.h"
 
+WiFiClientSecure espClient;
+
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org");
+
 extern "C" {
 #include "user_interface.h"
 }
 
-#define Led_Aviso D0 //Green led for displaying bath status
-#define rele D1      // The relay pin for closing the pipe
+const int Led_Aviso = D0; //Green led for displaying bath status
+const int rele = D1;     // The relay pin for closing the pipe
 const int  BATH_BUTTON_PIN = D2;// Bath start/stop button
-#define buzzer D3 // Buzzer
+const int buzzer = D3; // Buzzer
 #define connectionLed D4 // Led for displaying the connection status
 #define buttonResetPin D5 //Button reset wifi
 
 int buttonResetState = 0;
 
 
-char aws_endpoint[]    = "agq6mvwjsctpy-ats.iot.us-east-1.amazonaws.com";
+const char* AWS_endpoint    = "agq6mvwjsctpy-ats.iot.us-east-1.amazonaws.com";
 char aws_region[]      = "us-east-1";
 const char* aws_topic_times  = strdup(((String)ESP.getChipId() + "/times").c_str());
 const char* aws_topic_conf  = strdup(((String)ESP.getChipId() + "/configuration").c_str());
@@ -96,7 +103,7 @@ const int maxMQTTMessageHandlers = 1;
 //
 AWSWebSocketClient awsWSclient(1000);
 //
-PubSubClient client(awsWSclient);
+PubSubClient client(AWS_endpoint, 8883, callback, espClient); //set  MQTT port number to 8883 as per //standard
 //IPStack ipstack(awsWSclient);
 //MQTT::Client<IPStack, Countdown, maxMQTTpackageSize, maxMQTTMessageHandlers> client(ipstack);
 

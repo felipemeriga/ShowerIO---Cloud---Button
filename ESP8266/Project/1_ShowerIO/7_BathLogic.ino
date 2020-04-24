@@ -136,8 +136,8 @@ void startBath() {
   bathDurationBuzzer = true;
 }
 
-
-void buttonPressed () // Interrupt function
+// The ICACHE_RAM_ATTR is added to prevent the ESP8266 new versions bugs on interruptions
+void ICACHE_RAM_ATTR buttonPressed () // Interrupt function
 {
   if (!onSmartConfig) {
     unsigned long interrupt_time = millis();
@@ -160,9 +160,9 @@ void buttonPressed () // Interrupt function
 }
 
 void initBathConfiguration() {
-  pinMode(BATH_BUTTON_PIN, INPUT);
+  pinMode(BATH_BUTTON_PIN, INPUT_PULLUP);
   DBG_OUTPUT_PORT.println("Bath configured");
-  attachInterrupt(BATH_BUTTON_PIN, buttonPressed, RISING);
+  attachInterrupt(digitalPinToInterrupt(BATH_BUTTON_PIN), buttonPressed, RISING);
   sei(); // Enable interrupts
   waiting = false;
   bathRunning = false;

@@ -85,18 +85,16 @@ public class DevicePersistance {
         DeviceDO hashKeyObject = new DeviceDO();
         hashKeyObject.setUserId(AuthorizationHandle.getCurrentUserId());
 
-        Condition rangeAndHashKeyCondition = new Condition()
-                .withComparisonOperator(ComparisonOperator.NOT_NULL);
-
-        final DynamoDBQueryExpression queryExpression = new DynamoDBQueryExpression()
-                .withHashKeyValues(hashKeyObject)
-                .withConsistentRead(false);
+        Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
+        eav.put(":val1", new AttributeValue().withS(AuthorizationHandle.getCurrentUserId()));
+        final DynamoDBScanExpression dynamoDBScanExpression = new DynamoDBScanExpression();
+        dynamoDBScanExpression.withFilterExpression("userId = :val1").withExpressionAttributeValues(eav);
 
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    List<DeviceDO> result = AwsDynamoDBManager.dynamoDBMapper.query(DeviceDO.class, queryExpression);
+                    List<DeviceDO> result = AwsDynamoDBManager.dynamoDBMapper.scan(DeviceDO.class, dynamoDBScanExpression);
                     lastUpdateUserDevices = result;
                     serverCallback.onServerCallback(true, "SUCCESS");
                 } catch (Exception e) {

@@ -6,89 +6,7 @@ char* generateClientID () {
   return cID;
 }
 
-////callback to handle mqtt messages
-//void messageArrived(MQTT::MessageData& md)
-//{
-//  MQTT::Message &message = md.message;
-//
-//  Serial.print("Message ");
-//  Serial.print(++arrivedcount);
-//  Serial.print(" arrived: qos ");
-//  Serial.print(message.qos);
-//  Serial.print(", retained ");
-//  Serial.print(message.retained);
-//  Serial.print(", dup ");
-//  Serial.print(message.dup);
-//  Serial.print(", packetid ");
-//  Serial.println(message.id);
-//  Serial.print("Payload ");
-//  char* msg = new char[message.payloadlen+1]();
-//  memcpy (msg,message.payload,message.payloadlen);
-//  Serial.println(msg);
-//  delete msg;
-//}
 
-//connects to websocket layer and mqtt layer
-//bool connect () {
-//
-//
-//
-//    if (client.isConnected ()) {
-//        client.disconnect ();
-//    }
-//    //delay is not necessary... it just help us to get a "trustful" heap space value
-//    delay (1000);
-//    Serial.print (millis ());
-//    Serial.print (" - conn: ");
-//    Serial.print (++connection);
-//    Serial.print (" - (");
-//    Serial.print (ESP.getFreeHeap ());
-//    Serial.println (")");
-//
-//
-//
-//
-//   int rc = ipstack.connect(aws_endpoint, port);
-//    if (rc != 1)
-//    {
-//      Serial.println("error connection to the websocket server");
-//      return false;
-//    } else {
-//      Serial.println("websocket layer connected");
-//    }
-//
-//
-//    Serial.println("MQTT connecting");
-//    MQTTPacket_connectData data = MQTTPacket_connectData_initializer;
-//    data.MQTTVersion = 4;
-//    char* clientID = generateClientID ();
-//    data.clientID.cstring = clientID;
-//    rc = client.connect(data);
-//    delete[] clientID;
-//    if (rc != 0)
-//    {
-//      Serial.print("error connection to MQTT server");
-//      Serial.println(rc);
-//      return false;
-//    }
-//    Serial.println("MQTT connected");
-//    return true;
-//}
-
-//subscribe to a mqtt topic
-//void subscribe () {
-//   //subscript to a topic
-//    int rc = client.subscribe(aws_topic_times, MQTT::QOS0, messageArrived);
-//    if (rc != 0) {
-//      Serial.print("rc from MQTT subscribe is ");
-//      Serial.println(rc);
-//      return;
-//    }
-//    Serial.println("MQTT subscribed");
-//}
-//
-//
-//callback to handle mqtt messages
 void callback(char* topic, byte* payload, unsigned int length) {
   int lastPoint = 0;
   int substringTimes = 0;
@@ -139,37 +57,30 @@ void callback(char* topic, byte* payload, unsigned int length) {
   DBG_OUTPUT_PORT.println();
 }
 
-//connects to websocket layer and mqtt layer
-bool connect () {
+void reconnect() {
+  // Loop until we're reconnected
+  while (!client.connected()) {
+    DBG_OUTPUT_PORT.print("Attempting MQTT connection...");
+    // Attempt to connect
+    if (client.connect("ESPthing")) {
+      DBG_OUTPUT_PORT.println("connected");
+      subscribe ();
+      getBathParams();
 
+    } else {
+      DBG_OUTPUT_PORT.print("failed, rc=");
+      DBG_OUTPUT_PORT.print(client.state());
+      DBG_OUTPUT_PORT.println(" try again in 5 seconds");
 
+      char buf[256];
+      espClient.getLastSSLError(buf,256);
+      DBG_OUTPUT_PORT.print("WiFiClientSecure SSL error: ");
+      DBG_OUTPUT_PORT.println(buf);
 
-  //  if (client.connected()) {
-  //    client.disconnect ();
-  //  }
-
-  DBG_OUTPUT_PORT.print (millis ());
-  DBG_OUTPUT_PORT.print (" - conn: ");
-  DBG_OUTPUT_PORT.print (++connection);
-  DBG_OUTPUT_PORT.print (" - (");
-  DBG_OUTPUT_PORT.print (ESP.getFreeHeap ());
-  DBG_OUTPUT_PORT.println (")");
-
-
-  //creating random client id
-  String clientIDString = (String)ESP.getChipId();
-  char* clientID = strdup(clientIDString.c_str());
-
-  client.setServer(aws_endpoint, port);
-  if (client.connect(clientID)) {
-    DBG_OUTPUT_PORT.println("connected");
-    return true;
-  } else {
-    DBG_OUTPUT_PORT.print("failed, rc=");
-    DBG_OUTPUT_PORT.print(client.state());
-    return false;
+      // Wait 5 seconds before retrying
+      delay(5000);
+    }
   }
-
 }
 
 

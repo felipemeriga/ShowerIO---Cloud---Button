@@ -28,7 +28,7 @@ public class AwsIotCoreManager {
 
     // Cognito pool ID. For this app, pool needs to be unauthenticated pool with
     // AWS IoT permissions.
-    private static final String COGNITO_POOL_ID = "us-east-1:50c009ca-a485-4e17-831a-ed522fb91724";
+    private static final String COGNITO_POOL_ID = "us-east-1:f53d1bae-34fa-4d4e-89cf-930ac91e79ba";
     // Region of AWS IoT
     private static final Regions MY_REGION = Regions.US_EAST_1;
 
